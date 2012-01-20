@@ -15,3 +15,5 @@ SOURCES += \
     display/gamedisplay.cpp \
     client/receiverthread.cpp \
     client/main.cpp
+
+QT += network

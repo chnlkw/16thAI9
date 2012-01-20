@@ -3,15 +3,18 @@
 
 #include <QThread>
 #include <QTcpSocket>
+#include "common/common.h"
 
 class ReceiverThread : public QThread {
 public:
-    ReceiverThread(QString serverHost, quint16 serverPort);
+    ReceiverThread(QString serverHost, quint16 serverPort, GameStatus* gameStatus);
     void run();
 private:
     QString serverHost;
     quint16 serverPort;
-    QTcpSocket* tcpSocket;
+    QTcpSocket* recvSocket;
+
+    GameStatus* gameStatus;
 
 private slots:
     void receiveData();
