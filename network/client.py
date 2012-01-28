@@ -1,7 +1,7 @@
 #!/bin/python
 
 SERVER_IP = 'localhost'
-SERVER_PORT = 33444
+SERVER_PORT = 33445
 
 from socket import *
 import time
@@ -11,7 +11,10 @@ if __name__ == '__main__':
 	player = sys.argv[1]
 	sock = socket(AF_INET, SOCK_STREAM)
 	sock.connect((SERVER_IP, SERVER_PORT))
-	sock.send(player)
+	sock.send('LOGIN ' + player)
+	character = sock.recv(1024)
+	print 'I''m ', character
+	sock.send('READY')
 	s = '..'
 	while s != 'Start' :
 		s = sock.recv(1024)
