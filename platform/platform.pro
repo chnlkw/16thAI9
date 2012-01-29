@@ -2,18 +2,20 @@ HEADERS += \
     common/common.h \
     common/const.h \
     common/utils.h \
-    client/gameclient.h \
     server/gameserver.h \
-    display/gamedisplay.h \
-    client/receiverthread.h
+    common/network.h \
+    server/serverreceiverthread.h \
+    server/serversenderthread.h \
+    server/servertimer.h
 
 SOURCES += \
     common/common.cpp \
     common/utils.cpp \
-    client/gameclient.cpp \
     server/gameserver.cpp \
-    display/gamedisplay.cpp \
-    client/receiverthread.cpp \
-    client/main.cpp
+    common/network.cpp \
+    server/main.cpp \
+    server/serverreceiverthread.cpp \
+    server/serversenderthread.cpp \
+    server/servertimer.cpp
 
 QT += network
