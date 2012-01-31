@@ -10,19 +10,20 @@ public:
     GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType);
     void run();
 private:
-    GameStatus gameStatus;
     QHostAddress serverAddr;
     quint16 serverPort;
-
     CLIENT_TYPE clientType;
 
-    void shakeHands();
     QTcpSocket* sendSocket;
-
     ClientReceiverThread* recvThread;
 
+    GameInfo recvGameInfo;
     vector<NewBullet> recvNewBullets;
     vector<PlaneAction> recvPlaneActions;
+
+    void shakeHands();
+    void update();
+    void getActions(vector<NewBullet>& newBullets);
 };
 
 #endif // GAMECLIENT_H

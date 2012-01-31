@@ -9,32 +9,19 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
 void GameClient::run() {
     shakeHands();
 
-    /* AI starts from here.
-     * It will get the game status from recvThread.
-     * Do some calculations, and then send to server.
-     * Here I just test for networks.
-     */
-
-    // The first actions, send a string 'actions', followed by newBullets.
-    sendString(sendSocket, QString("actions"));
-    vector<NewBullet> newBullets;
-    for (int i = 0; i < 2; i ++) {
-        NewBullet newBullet;
-        newBullet.initTime = i * 10;
-        newBullet.x = i;
-        newBullet.y = i;
-        newBullet.vx = i + 1;
-        newBullet.vy = i + 1;
-        newBullets.push_back(newBullet);
+    while (true) {
+        if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
+        if (recvGameInfo.gameStatus != BATTLE) continue;
+        update();
+        vector<NewBullet> newBullets;
+        getActions(newBullets);
+        sendString(sendSocket, QString("actions"));
+        sendBossActions(sendSocket, newBullets);
     }
-    sendBossActions(sendSocket, newBullets);
 
     // The last action, send a string 'close'.
     sendString(sendSocket, QString("close"));
-
     sendSocket->disconnectFromHost();
-
-    while (true);
 }
 
 void GameClient::shakeHands() {
@@ -53,8 +40,60 @@ void GameClient::shakeHands() {
 
     cout << "boss sender shake hand over" << endl;
 
-    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType,
+    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo,
                                           &recvNewBullets, &recvPlaneActions);
     recvThread->start();
 }
 
+void GameClient::update() {
+    // Calculate planeX, planeY
+    double move[recvGameInfo.round][2];
+    memset(move, 0, sizeof(move));
+    for (int i = 0; i < recvPlaneActions.size(); i ++) {
+        PlaneAction& act = recvPlaneActions[i];
+        for (int t = act.startTime; t <= MIN(recvGameInfo.round - 1, act.endTime); t ++) {
+            move[t][0] = act.dx;
+            move[t][1] = act.dy;
+        }
+    }
+    double planeX = PLANE_INIT_X, planeY = PLANE_INIT_Y;
+    for (int t = 0; t < recvGameInfo.round; t ++) {
+        planeX += move[t][0];
+        planeY += move[t][1];
+    }
+    recvGameInfo.planeX = planeX;
+    recvGameInfo.planeY = planeY;
+
+    // Calculate bullets
+    vector<Bullet> bullets;
+    for (int i = 0; i < recvNewBullets.size(); i ++) {
+        NewBullet& nb = recvNewBullets[i];
+        if (nb.initTime > recvGameInfo.round ||
+                (recvGameInfo.round - nb.initTime) * BULLET_V > sqrt(WIDTH*WIDTH + HEIGHT*HEIGHT)) continue;
+        double x = nb.x, y = nb.y;
+        x += nb.vx * (recvGameInfo.round - nb.initTime);
+        y += nb.vy * (recvGameInfo.round - nb.initTime);
+        if (0 <= x && x <= WIDTH && 0 <= y && y <= HEIGHT) {
+            Bullet bullet;
+            bullet.x = x;
+            bullet.y = y;
+            bullet.vx = nb.vx;
+            bullet.vy = nb.vy;
+            bullets.push_back(bullet);
+        }
+    }
+    recvGameInfo.bullets = bullets;
+}
+
+void GameClient::getActions(vector<NewBullet> &newBullets) {
+    // AI
+    for (int i = 0; i < 2; i ++) {
+        NewBullet newBullet;
+        newBullet.initTime = i * 10;
+        newBullet.x = i;
+        newBullet.y = i;
+        newBullet.vx = i + 1;
+        newBullet.vy = i + 1;
+        newBullets.push_back(newBullet);
+    }
+}

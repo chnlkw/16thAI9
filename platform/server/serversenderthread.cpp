@@ -14,9 +14,10 @@ ServerSenderThread::ServerSenderThread(int socketDescriptor, CLIENT_TYPE clientT
 void ServerSenderThread::run() {
 }
 
-void ServerSenderThread::send(int round) {
-    cout << "round: " << round << " server send to " << (int)clientType << endl;
+void ServerSenderThread::send(const GameInfo& gameInfo) {
+    cout << "round: " << gameInfo.round << " server send to " << (int)clientType << endl;
     sendString(socket, QString("actions"));
+    sendGameInfo(socket, gameInfo);
     sendBossActions(socket, *newBullets);
     sendPlaneActions(socket, *planeActions);
 }

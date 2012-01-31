@@ -17,9 +17,18 @@ enum CLIENT_TYPE {
 };
 
 enum GAME_STATUS {
-    BATTLE = 0,
+    INIT = 0,
+    BATTLE,
     BOSS_WIN,
     PLANE_WIN
 };
+
+const double BULLET_V = 20;
+const double WIDTH = 600;
+const double HEIGHT = 800;
+
+const double PLANE_INIT_X = 100;
+const double PLANE_INIT_Y = 100;
+const double PLANE_V = 40;
 
 #endif // CONST_H

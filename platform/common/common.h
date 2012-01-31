@@ -23,16 +23,16 @@ struct PlaneAction {
     double dx, dy;
 };
 
-struct GameStatus {
-    GAME_STATUS status;
-    int time;
-    double planeX, planeY;
-    vector<Bullet> bullets;
-};
-
 struct Player {
     QString name;
     int socketDescriptor;
+};
+
+struct GameInfo {
+    int round, score;
+    GAME_STATUS gameStatus;
+    double planeX, planeY;
+    vector<Bullet> bullets;
 };
 
 #endif // COMMON_H

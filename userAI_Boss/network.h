@@ -16,4 +16,7 @@ void recvBossActions(QTcpSocket* socket, vector<NewBullet>& newBullets);
 void sendPlaneActions(QTcpSocket* socket, const vector<PlaneAction>& planeActions);
 void recvPlaneActions(QTcpSocket* socket, vector<PlaneAction>& planeActions);
 
+void sendGameInfo(QTcpSocket* socket, const GameInfo& gameInfo);
+void recvGameInfo(QTcpSocket* socket, GameInfo& gameInfo);
+
 #endif // NETWORK_H

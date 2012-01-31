@@ -1,6 +1,7 @@
 #include "clientreceiverthread.h"
 
 ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType,
+                                           GameInfo* gameInfo,
                                            vector<NewBullet>* newBullets, vector<PlaneAction>* planeActions,
                                            QObject *parent) :
     QThread(parent)
@@ -8,6 +9,7 @@ ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serv
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
+    this->gameInfo = gameInfo;
     this->newBullets = newBullets;
     this->planeActions = planeActions;
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
@@ -21,6 +23,7 @@ void ClientReceiverThread::run() {
         cout << "boss recv " << serverStatus.toStdString() << endl;
         if (serverStatus == "close") break;
         assert(serverStatus == "actions");
+        recvGameInfo(recvSocket, *gameInfo);
         recvBossActions(recvSocket, *newBullets);
         recvPlaneActions(recvSocket, *planeActions);
     }

@@ -113,3 +113,32 @@ void recvPlaneActions(QTcpSocket *socket, vector<PlaneAction> &planeActions) {
         planeActions.push_back(planeAction);
     }
 }
+
+void sendGameInfo(QTcpSocket *socket, const GameInfo &gameInfo) {
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << (quint32)0;
+    out << gameInfo.round;
+    out << gameInfo.score;
+    out << (int)gameInfo.gameStatus;
+    out.device()->seek(0);
+    out << (quint32)(block.size() - sizeof(quint32));
+    socket->write(block);
+    socket->waitForBytesWritten(-1);
+}
+
+void recvGameInfo(QTcpSocket *socket, GameInfo &gameInfo) {
+    socket->waitForReadyRead(-1);
+    QDataStream in(socket);
+    in.setVersion(QDataStream::Qt_4_0);
+    while (socket->bytesAvailable() < (int)sizeof(quint32));
+    quint32 blockSize;
+    in >> blockSize;
+    while (socket->bytesAvailable() < blockSize);
+    in >> gameInfo.round;
+    in >> gameInfo.score;
+    int gameStatus;
+    in >> gameStatus;
+    gameInfo.gameStatus = (GAME_STATUS)gameStatus;
+}

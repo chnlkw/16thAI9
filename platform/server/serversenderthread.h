@@ -17,7 +17,7 @@ public:
 signals:
 
 public slots:
-    void send(int round);
+    void send(const GameInfo& gameInfo);
 
 private:
     CLIENT_TYPE clientType;

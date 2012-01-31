@@ -1,6 +1,10 @@
 #include "gameserver.h"
 
 GameServer::GameServer() {
+    gameInfo.gameStatus = INIT;
+    gameInfo.score = 0;
+    gameInfo.planeX = PLANE_INIT_X;
+    gameInfo.planeY = PLANE_INIT_Y;
 }
 
 void GameServer::run() {
@@ -9,11 +13,15 @@ void GameServer::run() {
     shakeHands();
     cout << "shake hands over" << endl;
 
+    gameInfo.gameStatus = BATTLE;
+
     for (int i = 0; i < 3000; i ++) {
         ServerTimer::msleep(1000);
-        calc(i);
-        bossSendThread->send(i);
-        planeSendThread->send(i);
+        gameInfo.round = i;
+        calc();
+        bossSendThread->send(gameInfo);
+        planeSendThread->send(gameInfo);
+        if (gameInfo.gameStatus != BATTLE) break;
     }
 }
 
@@ -67,6 +75,7 @@ void GameServer::shakeHands() {
   * The ais' actions will be received and placed into newBullets, planeActions.
   * This function will be called every 100ms.
   */
-void GameServer::calc(int round) {
-    cout << "server calculate round = " << round << endl;
+void GameServer::calc() {
+    cout << "server calculate round = " << gameInfo.round << endl;
+
 }

@@ -15,10 +15,10 @@ public:
 
 private:
     void shakeHands();
-    void calc(int round);
+    void calc();
 
     Player players[2];
-
+    GameInfo gameInfo;
     vector<NewBullet> newBullets;
     vector<PlaneAction> planeActions;
 
