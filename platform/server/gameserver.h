@@ -3,7 +3,6 @@
 
 #include <QTcpServer>
 #include <QTimer>
-#include "servertimer.h"
 #include "serverreceiverthread.h"
 #include "serversenderthread.h"
 
@@ -16,11 +15,19 @@ public:
 private:
     void shakeHands();
     void calc();
+    void genRep();
+    bool isValidNewBullet(const NewBullet& bullet);
+    bool isValidPlaneAction(const PlaneAction& action);
+
+    FILE* repFile;
 
     Player players[2];
     GameInfo gameInfo;
-    vector<NewBullet> newBullets;
-    vector<PlaneAction> planeActions;
+
+    int cntNewBulletsNum, cntPlaneActionsNum;
+
+    vector<NewBullet> recvNewBullets, newBullets;
+    vector<PlaneAction> recvPlaneActions, planeActions;
 
     ServerReceiverThread *bossRecvThread, *planeRecvThread;
     ServerSenderThread *bossSendThread, *planeSendThread;

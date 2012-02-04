@@ -13,11 +13,11 @@ public:
     explicit ServerSenderThread(int socketDescriptor, CLIENT_TYPE clientType,
                                 vector<NewBullet>* newBullets, vector<PlaneAction>* planeActions, QObject *parent = 0);
     void run();
+    void send(const GameInfo& gameInfo);
 
 signals:
 
 public slots:
-    void send(const GameInfo& gameInfo);
 
 private:
     CLIENT_TYPE clientType;
@@ -25,6 +25,7 @@ private:
     vector<NewBullet>* newBullets;
     vector<PlaneAction>* planeActions;
 
+    int cntNewBulletsNum, cntPlaneActionsNum;
 };
 
 #endif // SERVERSENDERTHREAD_H

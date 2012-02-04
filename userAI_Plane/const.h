@@ -24,6 +24,7 @@ enum GAME_STATUS {
 };
 
 const double BULLET_V = 20;
+const double BULLET_R = 10;
 const double WIDTH = 600;
 const double HEIGHT = 800;
 

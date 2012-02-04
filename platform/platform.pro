@@ -5,8 +5,7 @@ HEADERS += \
     server/gameserver.h \
     common/network.h \
     server/serverreceiverthread.h \
-    server/serversenderthread.h \
-    server/servertimer.h
+    server/serversenderthread.h
 
 SOURCES += \
     common/common.cpp \
@@ -15,7 +14,6 @@ SOURCES += \
     common/network.cpp \
     server/main.cpp \
     server/serverreceiverthread.cpp \
-    server/serversenderthread.cpp \
-    server/servertimer.cpp
+    server/serversenderthread.cpp
 
 QT += network

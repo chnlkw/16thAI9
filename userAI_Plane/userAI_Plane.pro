@@ -10,6 +10,8 @@ SOURCES += \
     network.cpp \
     gameclient.cpp \
     main.cpp \
-    clientreceiverthread.cpp
+    clientreceiverthread.cpp \
+    common.cpp \
+    utils.cpp
 
 QT += network

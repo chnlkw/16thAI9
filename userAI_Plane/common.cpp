@@ -40,3 +40,4 @@ void updateGameInfo(GameInfo &gameInfo, const vector<NewBullet> &newBullets, con
     gameInfo.bullets = bullets;
 }
 
+

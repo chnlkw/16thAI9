@@ -35,4 +35,6 @@ struct GameInfo {
     vector<Bullet> bullets;
 };
 
+void updateGameInfo(GameInfo& gameInfo, const vector<NewBullet>& newBullets, const vector<PlaneAction>& planeActions);
+
 #endif // COMMON_H

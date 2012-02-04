@@ -20,10 +20,11 @@ void ClientReceiverThread::run() {
     while (true) {
         QString serverStatus;
         recvString(recvSocket, serverStatus);
-        cout << "plane recv " << serverStatus.toStdString() << endl;
+        cout << "plane recv " << serverStatus.toStdString() << " ";
         if (serverStatus == "close") break;
         assert(serverStatus == "actions");
         recvGameInfo(recvSocket, *gameInfo);
+        cout << gameInfo->round << "," << (int)gameInfo->gameStatus << endl;
         recvBossActions(recvSocket, *newBullets);
         recvPlaneActions(recvSocket, *planeActions);
     }

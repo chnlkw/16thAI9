@@ -2,7 +2,8 @@ SOURCES += \
     main.cpp \
     gameclient.cpp \
     network.cpp \
-    clientreceiverthread.cpp
+    clientreceiverthread.cpp \
+    common.cpp
 
 HEADERS += \
     gameclient.h \

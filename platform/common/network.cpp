@@ -55,6 +55,25 @@ void sendBossActions(QTcpSocket *socket, const vector<NewBullet> &newBullets) {
     socket->waitForBytesWritten(-1);
 }
 
+void sendBossActions(QTcpSocket *socket, const vector<NewBullet> &newBullets, int start, int end) {
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << (quint32)0;
+    out << (quint32)(end - start);
+    for (int i = start; i < end; i ++) {
+        out << newBullets[i].initTime;
+        out << newBullets[i].x;
+        out << newBullets[i].y;
+        out << newBullets[i].vx;
+        out << newBullets[i].vy;
+    }
+    out.device()->seek(0);
+    out << (quint32)(block.size() - sizeof(quint32));
+    socket->write(block);
+    socket->waitForBytesWritten(-1);
+}
+
 void recvBossActions(QTcpSocket *socket, vector<NewBullet> &newBullets) {
     socket->waitForReadyRead(-1);
     QDataStream in(socket);
@@ -83,6 +102,24 @@ void sendPlaneActions(QTcpSocket *socket, const vector<PlaneAction> &planeAction
     out << (quint32)0;
     out << (quint32)planeActions.size();
     for (int i = 0; i < planeActions.size(); i ++) {
+        out << planeActions[i].startTime;
+        out << planeActions[i].endTime;
+        out << planeActions[i].dx;
+        out << planeActions[i].dy;
+    }
+    out.device()->seek(0);
+    out << (quint32)(block.size() - sizeof(quint32));
+    socket->write(block);
+    socket->waitForBytesWritten(-1);
+}
+
+void sendPlaneActions(QTcpSocket *socket, const vector<PlaneAction> &planeActions, int start, int end) {
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << (quint32)0;
+    out << (quint32)(end - start);
+    for (int i = start; i < end; i ++) {
         out << planeActions[i].startTime;
         out << planeActions[i].endTime;
         out << planeActions[i].dx;

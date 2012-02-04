@@ -9,15 +9,21 @@ ServerSenderThread::ServerSenderThread(int socketDescriptor, CLIENT_TYPE clientT
     this->newBullets = newBullets;
     this->planeActions = planeActions;
     this->clientType = clientType;
+    cntNewBulletsNum = cntPlaneActionsNum = 0;
 }
 
 void ServerSenderThread::run() {
 }
 
 void ServerSenderThread::send(const GameInfo& gameInfo) {
-    cout << "round: " << gameInfo.round << " server send to " << (int)clientType << endl;
+    //cout << "round: " << gameInfo.round << " server send to " << (int)clientType << " ";
+    //cout << gameInfo.round << "," << (int)gameInfo.gameStatus << endl;
     sendString(socket, QString("actions"));
     sendGameInfo(socket, gameInfo);
-    sendBossActions(socket, *newBullets);
-    sendPlaneActions(socket, *planeActions);
+    int size = newBullets->size();
+    sendBossActions(socket, *newBullets, cntNewBulletsNum, size);
+    cntNewBulletsNum = size;
+    size = planeActions->size();
+    sendPlaneActions(socket, *planeActions, cntPlaneActionsNum, size);
+    cntPlaneActionsNum = size;
 }

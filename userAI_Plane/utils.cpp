@@ -1,6 +1,6 @@
 #include "utils.h"
 
-ServerTimer::ServerTimer(QObject *parent) :
+Timer::Timer(QObject *parent) :
     QThread(parent)
 {
 }

@@ -9,14 +9,23 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
 void GameClient::run() {
     shakeHands();
 
+    int prevRound = -1;
+
+
     while (true) {
+        Timer::msleep(300);
+        //cout << recvGameInfo.round << "," << (int)recvGameInfo.gameStatus << endl;
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
+        if (prevRound == recvGameInfo.round) continue;
+        prevRound = recvGameInfo.round;
         update();
         vector<PlaneAction> planeActions;
         getActions(planeActions);
         sendString(sendSocket, QString("actions"));
         sendPlaneActions(sendSocket, planeActions);
+        cout << "send " << planeActions[0].startTime << "," << planeActions[0].endTime << " "
+             << planeActions[0].dx << "," << planeActions[0].dy << endl;
     }
 
     // The last action, send a string 'close'.
@@ -42,6 +51,7 @@ void GameClient::shakeHands() {
 
     recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo,
                                           &recvNewBullets, &recvPlaneActions);
+
     recvThread->start();
 }
 
@@ -87,13 +97,11 @@ void GameClient::update() {
 
 void GameClient::getActions(vector<PlaneAction> &planeActions) {
     // AI
-    for (int i = 0; i < 2; i ++) {
-        PlaneAction planeAction;
-        planeAction.startTime = i * 10;
-        planeAction.endTime = i * 10 + 5;
-        planeAction.dx = i;
-        planeAction.dy = i;
-        planeActions.push_back(planeAction);
-    }
+    PlaneAction planeAction;
+    planeAction.startTime = 10;
+    planeAction.endTime = 11;
+    planeAction.dx = 10;
+    planeAction.dy = 10;
+    planeActions.push_back(planeAction);
 }
 

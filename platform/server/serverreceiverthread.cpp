@@ -28,6 +28,9 @@ void ServerReceiverThread::run() {
             recvBossActions(socket, *newBullets);
         } else {
             recvPlaneActions(socket, *planeActions);
+            PlaneAction& act = (*planeActions)[0];
+            cout << "recv " << act.startTime << "," << act.endTime <<
+                    " " << act.dx << "," << act.dy << endl;
         }
     }
 }
