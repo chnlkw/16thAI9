@@ -4,6 +4,7 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
+    srand(time(0));
 }
 
 void GameClient::run() {
@@ -58,11 +59,18 @@ void GameClient::update() {
 
 void GameClient::getActions(vector<NewBullet> &newBullets) {
     // AI
+//    NewBullet newBullet;
+//    newBullet.initTime = recvGameInfo.round + 10;
+//    newBullet.x = 600;
+//    newBullet.y = 100;
+//    newBullet.vx = -20;
+//    newBullet.vy = 0;
+//    newBullets.push_back(newBullet);
     NewBullet newBullet;
     newBullet.initTime = recvGameInfo.round + 10;
-    newBullet.x = 600;
-    newBullet.y = 100;
-    newBullet.vx = -20;
-    newBullet.vy = 0;
+    newBullet.x = 300;
+    newBullet.y = 600;
+    newBullet.vx = rand() % 10 + 1;
+    newBullet.vy = rand() % 10 + 1;
     newBullets.push_back(newBullet);
 }

@@ -4,6 +4,7 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
+    srand(time(0));
 }
 
 void GameClient::run() {
@@ -96,11 +97,17 @@ void GameClient::update() {
 
 void GameClient::getActions(vector<PlaneAction> &planeActions) {
     // AI
+//    PlaneAction planeAction;
+//    planeAction.startTime = recvGameInfo.round + 10;
+//    planeAction.endTime = recvGameInfo.round + 1000;
+//    planeAction.dx = 20;
+//    planeAction.dy = 0;
+//    planeActions.push_back(planeAction);
     PlaneAction planeAction;
     planeAction.startTime = recvGameInfo.round + 10;
-    planeAction.endTime = recvGameInfo.round + 1000;
-    planeAction.dx = 20;
-    planeAction.dy = 0;
+    planeAction.endTime = recvGameInfo.round + 11;
+    planeAction.dx = rand() % 10 + 1;
+    planeAction.dy = rand() % 10 + 1;
     planeActions.push_back(planeAction);
 }
 

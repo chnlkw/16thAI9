@@ -4,7 +4,6 @@
 #include <QTcpServer>
 #include <QTimer>
 #include "serverreceiverthread.h"
-#include "serversenderthread.h"
 
 class GameServer : public QTcpServer {
     Q_OBJECT
@@ -16,6 +15,7 @@ private:
     void shakeHands();
     void calc();
     void genRep();
+    void send(QTcpSocket* socket);
     bool isValidNewBullet(const NewBullet& bullet);
     bool isValidPlaneAction(const PlaneAction& action);
 
@@ -24,13 +24,14 @@ private:
     Player players[2];
     GameInfo gameInfo;
 
-    int cntNewBulletsNum, cntPlaneActionsNum;
+    int cntRecvNewBulletsNum, cntRecvPlaneActionsNum;
+    int cntSendNewBulletsNum, cntSendPlaneActionsNum;
+    QTcpSocket* bossSendSocket, *planeSendSocket;
 
     vector<NewBullet> recvNewBullets, newBullets;
     vector<PlaneAction> recvPlaneActions, planeActions;
 
     ServerReceiverThread *bossRecvThread, *planeRecvThread;
-    ServerSenderThread *bossSendThread, *planeSendThread;
 
 };
 

@@ -10,6 +10,7 @@ using namespace std;
 
 const QHostAddress SERVER_ADDR("127.0.0.1");
 const quint16 SERVER_PORT = 20129;
+const int SOCKET_RECV_TIMEOUT = 10;
 
 enum CLIENT_TYPE {
     BOSS = 0,

@@ -5,7 +5,8 @@ GameServer::GameServer() {
     gameInfo.score = 0;
     gameInfo.planeX = PLANE_INIT_X;
     gameInfo.planeY = PLANE_INIT_Y;
-    cntNewBulletsNum = cntPlaneActionsNum = 0;
+    cntRecvNewBulletsNum = cntRecvPlaneActionsNum = 0;
+    cntSendNewBulletsNum = cntSendPlaneActionsNum = 0;
     repFile = fopen("test.rep", "w");
     fprintf(repFile, "0\n");
     fprintf(repFile, "I'm Boss\n");
@@ -29,8 +30,8 @@ void GameServer::run() {
         calc();
         genRep();
         updateGameInfo(gameInfo, newBullets, planeActions);
-        bossSendThread->send(gameInfo);
-        planeSendThread->send(gameInfo);
+        send(bossSendSocket);
+        send(planeSendSocket);
         if (gameInfo.gameStatus != BATTLE) break;
     }
 
@@ -65,18 +66,12 @@ void GameServer::shakeHands() {
             }
         } else if (sr == "client recver") {
             if ((CLIENT_TYPE)clientType == BOSS) {
-                cout << "boss recver" << endl;
-                bossSendThread = new ServerSenderThread(socket->socketDescriptor(), (CLIENT_TYPE)clientType,
-                                               &newBullets, &planeActions, this);
-                connect(bossSendThread, SIGNAL(finished()), bossSendThread, SLOT(deleteLater()));
-                bossSendThread->start();
+                bossSendSocket = new QTcpSocket();
+                bossSendSocket->setSocketDescriptor(socket->socketDescriptor());
                 sendString(socket, QString("shake hand over"));
             } else {
-                cout << "plane recver" << endl;
-                planeSendThread = new ServerSenderThread(socket->socketDescriptor(), (CLIENT_TYPE)clientType,
-                                               &newBullets, &planeActions, this);
-                connect(planeSendThread, SIGNAL(finished()), planeSendThread, SLOT(deleteLater()));
-                planeSendThread->start();
+                planeSendSocket = new QTcpSocket();
+                planeSendSocket->setSocketDescriptor(socket->socketDescriptor());
                 sendString(socket, QString("shake hand over"));
             }
         }
@@ -88,17 +83,17 @@ void GameServer::calc() {
 //    cout << "plane = " << gameInfo.planeX << "," << gameInfo.planeY << endl;
 
     int size = recvNewBullets.size();
-    for (int i = cntNewBulletsNum; i < size; i ++)
+    for (int i = cntRecvNewBulletsNum; i < size; i ++)
         if (isValidNewBullet(recvNewBullets[i]))
             newBullets.push_back(recvNewBullets[i]);
-    cntNewBulletsNum = size;
+    cntRecvNewBulletsNum = size;
 
     size = recvPlaneActions.size();
-    for (int i = cntPlaneActionsNum; i < size; i ++) {
+    for (int i = cntRecvPlaneActionsNum; i < size; i ++) {
         if (isValidPlaneAction(recvPlaneActions[i]))
             planeActions.push_back(recvPlaneActions[i]);
     }
-    cntPlaneActionsNum = size;
+    cntRecvPlaneActionsNum = size;
 
     if (gameInfo.round > 0) {
         double xp = gameInfo.planeX, yp = gameInfo.planeY;
@@ -133,7 +128,7 @@ void GameServer::calc() {
         }
 
         if (hit) gameInfo.gameStatus = BOSS_WIN;
-        else if (gameInfo.round == 2999) gameInfo.gameStatus = PLANE_WIN;
+        else if (gameInfo.round == 299) gameInfo.gameStatus = PLANE_WIN;
     }
 }
 
@@ -145,13 +140,25 @@ void GameServer::genRep() {
             tmp.push_back(bullet);
     }
     fprintf(repFile, "%d\n", tmp.size());
-    fprintf(repFile, "I'm Boss, HaHaHa\n");
-    fprintf(repFile, "I'm Player, hAhAhA\n");
+    fprintf(repFile, "Round = %d\n", gameInfo.round);
+    fprintf(repFile, "newBullets.size = %d, planeActions.size = %d\n", newBullets.size(), planeActions.size());
     fprintf(repFile, "300 600\n");
     fprintf(repFile, "%lf %lf\n", gameInfo.planeX, gameInfo.planeY);
     for (int i = 0; i < tmp.size(); i ++)
         fprintf(repFile, "%lf %lf %lf %lf\n", tmp[i].x, tmp[i].y, tmp[i].vx, tmp[i].vy);
     fprintf(repFile, "\n");
+}
+
+void GameServer::send(QTcpSocket* socket) {
+    sendString(socket, QString("actions"));
+    sendGameInfo(socket, gameInfo);
+    int size = newBullets.size();
+    sendBossActions(socket, newBullets, cntSendNewBulletsNum, size);
+    cntSendNewBulletsNum = size;
+    size = planeActions.size();
+    sendPlaneActions(socket, planeActions, cntSendPlaneActionsNum, size);
+    cntSendPlaneActionsNum = size;
+    //cout << time(0) << " send round = " << gameInfo.round << endl;
 }
 
 bool GameServer::isValidNewBullet(const NewBullet &bullet) {

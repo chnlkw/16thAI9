@@ -13,13 +13,14 @@ void sendString(QTcpSocket* socket, const QString& v) {
 }
 
 void recvString(QTcpSocket *socket, QString &v) {
-    socket->waitForReadyRead(-1);
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_0);
-    while (socket->bytesAvailable() < (int)sizeof(quint32));
+    while (socket->bytesAvailable() < (int)sizeof(quint32))
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     quint32 blockSize;
     in >> blockSize;
-    while (socket->bytesAvailable() < blockSize);
+    while (socket->bytesAvailable() < blockSize)
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     in >> v;
 }
 
@@ -30,9 +31,9 @@ void sendInt(QTcpSocket *socket, const int &v) {
 }
 
 void recvInt(QTcpSocket *socket, int &v) {
-    socket->waitForReadyRead(-1);
     QDataStream in(socket);
-    while (socket->bytesAvailable() < (int)sizeof(qint32));
+    while (socket->bytesAvailable() < (int)sizeof(qint32))
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     in >> v;
 }
 
@@ -55,14 +56,34 @@ void sendBossActions(QTcpSocket *socket, const vector<NewBullet> &newBullets) {
     socket->waitForBytesWritten(-1);
 }
 
+void sendBossActions(QTcpSocket *socket, const vector<NewBullet> &newBullets, int start, int end) {
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << (quint32)0;
+    out << (quint32)(end - start);
+    for (int i = start; i < end; i ++) {
+        out << newBullets[i].initTime;
+        out << newBullets[i].x;
+        out << newBullets[i].y;
+        out << newBullets[i].vx;
+        out << newBullets[i].vy;
+    }
+    out.device()->seek(0);
+    out << (quint32)(block.size() - sizeof(quint32));
+    socket->write(block);
+    socket->waitForBytesWritten(-1);
+}
+
 void recvBossActions(QTcpSocket *socket, vector<NewBullet> &newBullets) {
-    socket->waitForReadyRead(-1);
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_0);
-    while (socket->bytesAvailable() < (int)sizeof(quint32));
+    while (socket->bytesAvailable() < (int)sizeof(quint32))
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     quint32 blockSize;
     in >> blockSize;
-    while (socket->bytesAvailable() < blockSize);
+    while (socket->bytesAvailable() < blockSize)
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     quint32 size;
     in >> size;
     for (int i = 0; i < size; i ++) {
@@ -94,14 +115,33 @@ void sendPlaneActions(QTcpSocket *socket, const vector<PlaneAction> &planeAction
     socket->waitForBytesWritten(-1);
 }
 
+void sendPlaneActions(QTcpSocket *socket, const vector<PlaneAction> &planeActions, int start, int end) {
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << (quint32)0;
+    out << (quint32)(end - start);
+    for (int i = start; i < end; i ++) {
+        out << planeActions[i].startTime;
+        out << planeActions[i].endTime;
+        out << planeActions[i].dx;
+        out << planeActions[i].dy;
+    }
+    out.device()->seek(0);
+    out << (quint32)(block.size() - sizeof(quint32));
+    socket->write(block);
+    socket->waitForBytesWritten(-1);
+}
+
 void recvPlaneActions(QTcpSocket *socket, vector<PlaneAction> &planeActions) {
-    socket->waitForReadyRead(-1);
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_0);
-    while (socket->bytesAvailable() < (int)sizeof(quint32));
+    while (socket->bytesAvailable() < (int)sizeof(quint32))
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     quint32 blockSize;
     in >> blockSize;
-    while (socket->bytesAvailable() < blockSize);
+    while (socket->bytesAvailable() < blockSize)
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     quint32 size;
     in >> size;
     for (int i = 0; i < size; i ++) {
@@ -129,13 +169,14 @@ void sendGameInfo(QTcpSocket *socket, const GameInfo &gameInfo) {
 }
 
 void recvGameInfo(QTcpSocket *socket, GameInfo &gameInfo) {
-    socket->waitForReadyRead(-1);
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_0);
-    while (socket->bytesAvailable() < (int)sizeof(quint32));
+    while (socket->bytesAvailable() < (int)sizeof(quint32))
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     quint32 blockSize;
     in >> blockSize;
-    while (socket->bytesAvailable() < blockSize);
+    while (socket->bytesAvailable() < blockSize)
+        socket->waitForReadyRead(SOCKET_RECV_TIMEOUT);
     in >> gameInfo.round;
     in >> gameInfo.score;
     int gameStatus;
