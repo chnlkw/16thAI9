@@ -24,7 +24,7 @@ void GameServer::run() {
     gameInfo.gameStatus = BATTLE;
 
     for (int i = 0; i < 3000; i ++) {
-        ServerTimer::msleep(1000);
+        ServerTimer::msleep(100);
         gameInfo.round = i;
         calc();
         genRep();
@@ -84,8 +84,8 @@ void GameServer::shakeHands() {
 }
 
 void GameServer::calc() {
-    cout << "round = " << gameInfo.round << endl;
-    cout << "plane = " << gameInfo.planeX << "," << gameInfo.planeY << endl;
+//    cout << "round = " << gameInfo.round << endl;
+//    cout << "plane = " << gameInfo.planeX << "," << gameInfo.planeY << endl;
 
     int size = recvNewBullets.size();
     for (int i = cntNewBulletsNum; i < size; i ++)
@@ -94,11 +94,7 @@ void GameServer::calc() {
     cntNewBulletsNum = size;
 
     size = recvPlaneActions.size();
-    cout << "recvPlaneActions.size = " << size << endl;
     for (int i = cntPlaneActionsNum; i < size; i ++) {
-        cout << "recvPlaneActions " << i << ":" << endl;
-        cout << recvPlaneActions[i].startTime << "," << recvPlaneActions[i].endTime << endl;
-        cout << recvPlaneActions[i].dx << "," << recvPlaneActions[i].dy << endl;
         if (isValidPlaneAction(recvPlaneActions[i]))
             planeActions.push_back(recvPlaneActions[i]);
     }
@@ -131,6 +127,9 @@ void GameServer::calc() {
                 hit = true;
                 break;
             }
+//            printf("xp = %0.2lf, yp = %0.2lf\ndx = %0.2lf, dy = %0.2lf\n", xp, yp, dx, dy);
+//            printf("xb = %0.2lf, yb = %0.2lf\nvx = %0.2lf, vy = %0.2lf\n", xb, yb, vx, vy);
+//            printf("a = %0.2lf, b = %0.2lf, c = %0.2lf\n, t = %0.2lf, min = %0.2lf\n", a, b, c, t, min);
         }
 
         if (hit) gameInfo.gameStatus = BOSS_WIN;

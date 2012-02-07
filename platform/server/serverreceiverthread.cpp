@@ -26,11 +26,14 @@ void ServerReceiverThread::run() {
 
         if (clientType == BOSS) {
             recvBossActions(socket, *newBullets);
+            NewBullet& bullet = (*newBullets)[0];
+//            cout << "recv bullet " << bullet.initTime << " " << bullet.x << "," << bullet.y <<
+//                    " " << bullet.vx << "," << bullet.vy << endl;
         } else {
             recvPlaneActions(socket, *planeActions);
             PlaneAction& act = (*planeActions)[0];
-            cout << "recv " << act.startTime << "," << act.endTime <<
-                    " " << act.dx << "," << act.dy << endl;
+//            cout << "recv act " << act.startTime << "," << act.endTime <<
+//                    " " << act.dx << "," << act.dy << endl;
         }
     }
 }

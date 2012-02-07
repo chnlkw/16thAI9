@@ -12,6 +12,7 @@ void GameClient::run() {
     int prevRound = -1;
 
     while (true) {
+        Timer::msleep(1);
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
         if (prevRound == recvGameInfo.round) continue;
@@ -21,6 +22,8 @@ void GameClient::run() {
         getActions(newBullets);
         sendString(sendSocket, QString("actions"));
         sendBossActions(sendSocket, newBullets);
+//        cout << "send " << newBullets[0].initTime << " " << newBullets[0].x << "," << newBullets[0].y << " "
+//             << newBullets[0].vx << "," << newBullets[0].vy << endl;
     }
 
     // The last action, send a string 'close'.
@@ -55,13 +58,11 @@ void GameClient::update() {
 
 void GameClient::getActions(vector<NewBullet> &newBullets) {
     // AI
-    for (int i = 0; i < 2; i ++) {
-        NewBullet newBullet;
-        newBullet.initTime = i * 10;
-        newBullet.x = i;
-        newBullet.y = i;
-        newBullet.vx = i + 1;
-        newBullet.vy = i + 1;
-        newBullets.push_back(newBullet);
-    }
+    NewBullet newBullet;
+    newBullet.initTime = recvGameInfo.round + 10;
+    newBullet.x = 600;
+    newBullet.y = 100;
+    newBullet.vx = -20;
+    newBullet.vy = 0;
+    newBullets.push_back(newBullet);
 }
