@@ -1,0 +1,17 @@
+#ifndef CONST_H
+#define CONST_H
+
+#define FRAPS 60.0
+#define WIDTH 600.0
+#define HEIGTH 800.0
+#define BOSS_WIDTH 30
+#define BOSS_HEIGTH 40
+#define PLAYER_WIDTH 60
+#define PLAYER_HEIGTH 80
+#define BULLET_WIDTH 10.0
+#define BULLET_HEIGTH 15.0
+#define PI 3.14159265358979323846264338327950288
+#define GAMESPEED 0.1
+#define MAX_ELEMENT_NUM 10000
+
+#endif // CONST_H
