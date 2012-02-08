@@ -1,0 +1,58 @@
+16thAI9 Server - Client protocol
+
+Version	0.0.1
+Author	Li Kaiwei
+
+=================Initialization=====================
+
+Client(ask)		Server(response)
+
+LOGIN $player_name	OK!
+
+CHARACTER		boss|flight
+
+MAP			$mapwidth $mapheight
+
+BOSS			$bossX1 $bossY1 $bossX2 $bossX2
+FIREBASE		$firebaseX $firebaseY
+BULLET			$bulletmaxspeed
+
+FLIGHT			$flightX $flightY $flightRadix $flightmaxspeed
+
+INTERVAL		$timeinterval
+
+
+=====================Running========================
+
+Boss							Server					Flight
+
+READY					-->					<--		READY
+							GO!!!
+
+							***repeat here***
+					<--		TIME $curTime		-->
+
+$nNewbullet											$flightspeed $flightdirection 
+$bullet1speed $bullet1direction
+.......
+$bulletNspeed $bulletNdirection
+
+					-->		(Judge)			<--	
+							
+							GAMEOVER
+							****exit****
+							------------ OR
+							TIME $curTime
+							SCORE $flightscore
+							FLIGHT
+							$flightspeed $flightdirection 
+							BOSS
+							$nNewbullet								
+							$bullet1speed $bullet1direction
+							.......
+							$bulletNspeed $bulletNdirection
+
+(Thinking)				<--					-->		(Thinking)
+							(Delay $timeinterval)
+							***repeat above***
+					<--		Time $curTime		-->
