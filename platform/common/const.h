@@ -29,7 +29,7 @@ const double BULLET_R = 10;
 const double WIDTH = 600;
 const double HEIGHT = 800;
 
-const double PLANE_INIT_X = 100;
+const double PLANE_INIT_X = 300;
 const double PLANE_INIT_Y = 100;
 const double PLANE_V = 40;
 

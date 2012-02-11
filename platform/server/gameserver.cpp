@@ -7,12 +7,12 @@ GameServer::GameServer() {
     gameInfo.planeY = PLANE_INIT_Y;
     cntRecvNewBulletsNum = cntRecvPlaneActionsNum = 0;
     cntSendNewBulletsNum = cntSendPlaneActionsNum = 0;
-    repFile = fopen("test.rep", "w");
+    repFile = fopen("record.txt", "w");
     fprintf(repFile, "0\n");
     fprintf(repFile, "I'm Boss\n");
     fprintf(repFile, "I'm Player\n");
     fprintf(repFile, "300 600\n");
-    fprintf(repFile, "300 200\n");
+    fprintf(repFile, "300 100\n");
     fprintf(repFile, "\n");
 }
 

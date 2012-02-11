@@ -1,10 +1,20 @@
 #include "gameclient.h"
 
-GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType) {
+GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType, char*aiFile) {
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
-    srand(time(0));
+    QLibrary aiDll(aiFile);
+    if (aiDll.load()) {
+        callInit = (funcInit)aiDll.resolve("init");
+        callGetAction = (funcGetAction)aiDll.resolve("getAction");
+        if (!callInit || !callGetAction) {
+            cout << "failed resolve" << endl;
+        }
+    } else {
+        cout << "failed load" << endl;
+    }
+    init();
 }
 
 void GameClient::run() {
@@ -14,7 +24,6 @@ void GameClient::run() {
 
     while (true) {
         Timer::msleep(1);
-        //cout << recvGameInfo.round << "," << (int)recvGameInfo.gameStatus << endl;
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
         if (prevRound == recvGameInfo.round) continue;
@@ -24,13 +33,17 @@ void GameClient::run() {
         getActions(planeActions);
         sendString(sendSocket, QString("actions"));
         sendPlaneActions(sendSocket, planeActions);
-//        cout << "send " << planeActions[0].startTime << "," << planeActions[0].endTime << " "
-//             << planeActions[0].dx << "," << planeActions[0].dy << endl;
     }
 
     // The last action, send a string 'close'.
     sendString(sendSocket, QString("close"));
     sendSocket->disconnectFromHost();
+}
+
+void GameClient::init() {
+    string buf;
+    callInit(buf);
+    aiName = QString(buf.c_str());
 }
 
 void GameClient::shakeHands() {    
@@ -43,7 +56,7 @@ void GameClient::shakeHands() {
     assert(s == "accepted");
     sendString(sendSocket, "client sender");
     sendInt(sendSocket, (int)clientType);
-    sendString(sendSocket, QString("Client"));
+    sendString(sendSocket, aiName);
     recvString(sendSocket, s);
     assert(s == "shake hand over");
 
@@ -56,58 +69,10 @@ void GameClient::shakeHands() {
 }
 
 void GameClient::update() {
-    // Calculate planeX, planeY
-    double move[recvGameInfo.round][2];
-    memset(move, 0, sizeof(move));
-    for (int i = 0; i < recvPlaneActions.size(); i ++) {
-        PlaneAction& act = recvPlaneActions[i];
-        for (int t = act.startTime; t <= MIN(recvGameInfo.round - 1, act.endTime); t ++) {
-            move[t][0] = act.dx;
-            move[t][1] = act.dy;
-        }
-    }
-    double planeX = PLANE_INIT_X, planeY = PLANE_INIT_Y;
-    for (int t = 0; t < recvGameInfo.round; t ++) {
-        planeX += move[t][0];
-        planeY += move[t][1];
-    }
-    recvGameInfo.planeX = planeX;
-    recvGameInfo.planeY = planeY;
-
-    // Calculate bullets
-    vector<Bullet> bullets;
-    for (int i = 0; i < recvNewBullets.size(); i ++) {
-        NewBullet& nb = recvNewBullets[i];
-        if (nb.initTime > recvGameInfo.round ||
-                (recvGameInfo.round - nb.initTime) * BULLET_V > sqrt(WIDTH*WIDTH + HEIGHT*HEIGHT)) continue;
-        double x = nb.x, y = nb.y;
-        x += nb.vx * (recvGameInfo.round - nb.initTime);
-        y += nb.vy * (recvGameInfo.round - nb.initTime);
-        if (0 <= x && x <= WIDTH && 0 <= y && y <= HEIGHT) {
-            Bullet bullet;
-            bullet.x = x;
-            bullet.y = y;
-            bullet.vx = nb.vx;
-            bullet.vy = nb.vy;
-            bullets.push_back(bullet);
-        }
-    }
-    recvGameInfo.bullets = bullets;
+    updateGameInfo(recvGameInfo, recvNewBullets, recvPlaneActions);
 }
 
 void GameClient::getActions(vector<PlaneAction> &planeActions) {
-    // AI
-//    PlaneAction planeAction;
-//    planeAction.startTime = recvGameInfo.round + 10;
-//    planeAction.endTime = recvGameInfo.round + 1000;
-//    planeAction.dx = 20;
-//    planeAction.dy = 0;
-//    planeActions.push_back(planeAction);
-    PlaneAction planeAction;
-    planeAction.startTime = recvGameInfo.round + 10;
-    planeAction.endTime = recvGameInfo.round + 11;
-    planeAction.dx = rand() % 10 + 1;
-    planeAction.dy = rand() % 10 + 1;
-    planeActions.push_back(planeAction);
+    callGetAction(recvGameInfo, planeActions);
 }
 

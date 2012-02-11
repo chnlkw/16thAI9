@@ -4,11 +4,16 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
-    srand(time(0));
     QLibrary aiDll(aiFile);
-    aiDll.load();
-    callInit = (funcInit)aiDll.resolve("init");
-    callGetAction = (funcGetAction)aiDll.resolve("getAction");
+    if (aiDll.load()) {
+        callInit = (funcInit)aiDll.resolve("init");
+        callGetAction = (funcGetAction)aiDll.resolve("getAction");
+        if (!callInit || !callGetAction) {
+            cout << "failed resolve" << endl;
+        }
+    } else {
+        cout << "failed load" << endl;
+    }
     init();
 }
 
@@ -28,8 +33,6 @@ void GameClient::run() {
         getActions(newBullets);
         sendString(sendSocket, QString("actions"));
         sendBossActions(sendSocket, newBullets);
-//        cout << "send " << newBullets[0].initTime << " " << newBullets[0].x << "," << newBullets[0].y << " "
-//             << newBullets[0].vx << "," << newBullets[0].vy << endl;
     }
 
     // The last action, send a string 'close'.
@@ -69,21 +72,5 @@ void GameClient::update() {
 }
 
 void GameClient::getActions(vector<NewBullet> &newBullets) {
-    // AI
-//    NewBullet newBullet;
-//    newBullet.initTime = recvGameInfo.round + 10;
-//    newBullet.x = 600;
-//    newBullet.y = 100;
-//    newBullet.vx = -20;
-//    newBullet.vy = 0;
-//    newBullets.push_back(newBullet);
-//    NewBullet newBullet;
-//    newBullet.initTime = recvGameInfo.round + 10;
-//    newBullet.x = 300;
-//    newBullet.y = 600;
-//    newBullet.vx = rand() % 10 + 1;
-//    newBullet.vy = rand() % 10 + 1;
-//    newBullets.push_back(newBullet);
-
     callGetAction(recvGameInfo, newBullets);
 }
