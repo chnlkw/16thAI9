@@ -16,8 +16,8 @@ void init(string& name) {
 
 void getAction(const GameInfo& gameInfo, vector<PlaneAction>& planeActions) {
 	PlaneAction planeAction;
-    planeAction.startTime = gameInfo.round + 1;
-    planeAction.endTime = gameInfo.round + 2;
+    planeAction.startTime = gameInfo.round * 10 + 1;
+    planeAction.endTime = gameInfo.round * 10 + 11;
 	int t = randNum[cntRand++] % 2;
 	int p = (t == 1 ? 1 : -1);
     planeAction.dx = p * (randNum[cntRand++] % 10 + 1);

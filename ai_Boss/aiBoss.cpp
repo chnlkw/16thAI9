@@ -22,8 +22,8 @@ void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets) {
 		newBullet.y = 600;
 		int t = randNum[cntRand++] % 2;
 		int p = (t == 1 ? 1 : -1);
-		newBullet.vx = p * (randNum[cntRand++] % 10 + 1);
-		newBullet.vy = -1 * (randNum[cntRand++] % 10 + 1);
+		newBullet.vx = p * (randNum[cntRand++] % 200);
+		newBullet.vy = -1 * (randNum[cntRand++] % 200 + 1);
 		newBullets.push_back(newBullet);
 	}
 }
