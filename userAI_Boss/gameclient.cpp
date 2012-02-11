@@ -1,10 +1,15 @@
 #include "gameclient.h"
 
-GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType) {
+GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType, char* aiFile) {
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
     srand(time(0));
+    QLibrary aiDll(aiFile);
+    aiDll.load();
+    callInit = (funcInit)aiDll.resolve("init");
+    callGetAction = (funcGetAction)aiDll.resolve("getAction");
+    init();
 }
 
 void GameClient::run() {
@@ -32,6 +37,12 @@ void GameClient::run() {
     sendSocket->disconnectFromHost();
 }
 
+void GameClient::init() {
+    string buf;
+    callInit(buf);
+    aiName = QString(buf.c_str());
+}
+
 void GameClient::shakeHands() {
     sendSocket = new QTcpSocket();
     sendSocket->connectToHost(serverAddr, serverPort);
@@ -42,7 +53,7 @@ void GameClient::shakeHands() {
     assert(s == "accepted");
     sendString(sendSocket, "client sender");
     sendInt(sendSocket, (int)clientType);
-    sendString(sendSocket, QString("Boss"));
+    sendString(sendSocket, aiName);
     recvString(sendSocket, s);
     assert(s == "shake hand over");
 
@@ -66,11 +77,13 @@ void GameClient::getActions(vector<NewBullet> &newBullets) {
 //    newBullet.vx = -20;
 //    newBullet.vy = 0;
 //    newBullets.push_back(newBullet);
-    NewBullet newBullet;
-    newBullet.initTime = recvGameInfo.round + 10;
-    newBullet.x = 300;
-    newBullet.y = 600;
-    newBullet.vx = rand() % 10 + 1;
-    newBullet.vy = rand() % 10 + 1;
-    newBullets.push_back(newBullet);
+//    NewBullet newBullet;
+//    newBullet.initTime = recvGameInfo.round + 10;
+//    newBullet.x = 300;
+//    newBullet.y = 600;
+//    newBullet.vx = rand() % 10 + 1;
+//    newBullet.vy = rand() % 10 + 1;
+//    newBullets.push_back(newBullet);
+
+    callGetAction(recvGameInfo, newBullets);
 }
