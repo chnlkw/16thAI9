@@ -1,3 +1,6 @@
+CONFIG += console
+CONFIG -= app_bundle
+
 HEADERS += \
     utils.h \
     network.h \

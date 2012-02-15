@@ -3,8 +3,8 @@
 GameCenter::GameCenter(View *view)
 {
     this->view = view;
-    width = WIDTH;
-    height = HEIGTH;
+    width = 450;
+    height = 600;
 
     GameInit();
 }

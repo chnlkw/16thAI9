@@ -15,7 +15,7 @@ void init(string& name) {
 }
 
 void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets) {
-	for (int i = 0; i < 10; i ++) {
+	/*for (int i = 0; i < 10; i ++) {
 		NewBullet newBullet;
 		newBullet.initTime = gameInfo.round + 1;
 		newBullet.x = 300;
@@ -25,6 +25,13 @@ void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets) {
 		newBullet.vx = p * (randNum[cntRand++] % 200);
 		newBullet.vy = -1 * (randNum[cntRand++] % 200 + 1);
 		newBullets.push_back(newBullet);
-	}
+	}*/
+	NewBullet newBullet;
+	newBullet.initTime = gameInfo.round + 1;
+	newBullet.x = 300;
+	newBullet.y = 600;
+	newBullet.vx = 0;
+	newBullet.vy = -20;
+	newBullets.push_back(newBullet);
 }
 

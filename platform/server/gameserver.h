@@ -15,7 +15,7 @@ private:
     void shakeHands();
     void calc();
     void genRep();
-    void send(QTcpSocket* socket);
+    void send(QTcpSocket* bossSocket, QTcpSocket* planeSocket);
     bool isValidNewBullet(const NewBullet& bullet);
     bool isValidPlaneAction(const PlaneAction& action);
 

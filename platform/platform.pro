@@ -1,3 +1,6 @@
+CONFIG += console
+CONFIG -= app_bundle
+
 HEADERS += \
     common/common.h \
     common/const.h \
@@ -15,3 +18,4 @@ SOURCES += \
     server/serverreceiverthread.cpp
 
 QT += network
+

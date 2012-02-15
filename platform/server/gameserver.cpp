@@ -28,10 +28,9 @@ void GameServer::run() {
         ServerTimer::msleep(100);
         gameInfo.round = i;
         calc();
-        genRep();
+        if (gameInfo.gameStatus == BATTLE) genRep();
         updateGameInfo(gameInfo, newBullets, planeActions);
-        send(bossSendSocket);
-        send(planeSendSocket);
+        send(bossSendSocket, planeSendSocket);
         if (gameInfo.gameStatus != BATTLE) break;
     }
 
@@ -145,18 +144,22 @@ void GameServer::genRep() {
     fprintf(repFile, "300 600\n");
     fprintf(repFile, "%lf %lf\n", gameInfo.planeX, gameInfo.planeY);
     for (int i = 0; i < tmp.size(); i ++)
-        fprintf(repFile, "%lf %lf %lf %lf\n", tmp[i].x, tmp[i].y, tmp[i].vx, tmp[i].vy);
+        fprintf(repFile, "%lf %lf %lf %lf\n", tmp[i].x, tmp[i].y, tmp[i].vx * 10, tmp[i].vy * 10);
     fprintf(repFile, "\n");
 }
 
-void GameServer::send(QTcpSocket* socket) {
-    sendString(socket, QString("actions"));
-    sendGameInfo(socket, gameInfo);
+void GameServer::send(QTcpSocket* bossSocket, QTcpSocket* planeSocket) {
+    sendString(bossSocket, QString("actions"));
+    sendString(planeSocket, QString("actions"));
+    sendGameInfo(bossSocket, gameInfo);
+    sendGameInfo(planeSocket, gameInfo);
     int size = newBullets.size();
-    sendBossActions(socket, newBullets, cntSendNewBulletsNum, size);
+    sendBossActions(bossSocket, newBullets, cntSendNewBulletsNum, size);
+    sendBossActions(planeSocket, newBullets, cntSendNewBulletsNum, size);
     cntSendNewBulletsNum = size;
     size = planeActions.size();
-    sendPlaneActions(socket, planeActions, cntSendPlaneActionsNum, size);
+    sendPlaneActions(bossSocket, planeActions, cntSendPlaneActionsNum, size);
+    sendPlaneActions(planeSocket, planeActions, cntSendPlaneActionsNum, size);
     cntSendPlaneActionsNum = size;
     //cout << time(0) << " send round = " << gameInfo.round << endl;
 }
