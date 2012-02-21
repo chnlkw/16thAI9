@@ -28,10 +28,8 @@ void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets) {
 	}*/
 	NewBullet newBullet;
 	newBullet.initTime = gameInfo.round + 1;
-	newBullet.x = 300;
-	newBullet.y = 600;
 	newBullet.vx = 0;
-	newBullet.vy = -20;
+	newBullet.vy = BULLET_V;
 	newBullets.push_back(newBullet);
 }
 

@@ -16,6 +16,12 @@ void updateGameInfo(GameInfo &gameInfo, const vector<NewBullet> &newBullets, con
         planeX += move[t][0];
         planeY += move[t][1];
     }
+    if (planeX < 0) planeX = 0;
+    if (planeX > WIDTH) planeX = WIDTH;
+    if (planeY < 0) planeY = 0;
+    if (planeY > HEIGHT) planeY = HEIGHT;
+    if (fabs(gameInfo.planeX - planeX) < EPSILON && fabs(gameInfo.planeY - planeY) < EPSILON)
+        gameInfo.score ++;
     gameInfo.planeX = planeX;
     gameInfo.planeY = planeY;
 
@@ -25,7 +31,7 @@ void updateGameInfo(GameInfo &gameInfo, const vector<NewBullet> &newBullets, con
         const NewBullet& nb = newBullets[i];
         if (nb.initTime > gameInfo.round ||
                 (gameInfo.round - nb.initTime) * BULLET_V > sqrt(WIDTH*WIDTH + HEIGHT*HEIGHT)) continue;
-        double x = nb.x, y = nb.y;
+        double x = BULLET_X, y = BULLET_Y;
         x += nb.vx * (gameInfo.round - nb.initTime);
         y += nb.vy * (gameInfo.round - nb.initTime);
         if (0 <= x && x <= WIDTH && 0 <= y && y <= HEIGHT) {
@@ -39,5 +45,4 @@ void updateGameInfo(GameInfo &gameInfo, const vector<NewBullet> &newBullets, con
     }
     gameInfo.bullets = bullets;
 }
-
 

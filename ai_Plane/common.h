@@ -9,7 +9,6 @@ using namespace std;
 
 struct NewBullet {
     int initTime;
-    double x, y;
     double vx, vy;
 };
 

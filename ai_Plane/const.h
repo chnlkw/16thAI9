@@ -17,13 +17,19 @@ enum GAME_STATUS {
     PLANE_WIN
 };
 
-const double BULLET_V = 20;
-const double BULLET_R = 10;
 const double WIDTH = 600;
 const double HEIGHT = 800;
 
+const double BULLET_X = 300;
+const double BULLET_Y = 600;
+
+const double BULLET_V = 40;
+const double BULLET_R = 10;
+
 const double PLANE_INIT_X = 300;
 const double PLANE_INIT_Y = 100;
-const double PLANE_V = 40;
+const double PLANE_V = 30;
+
+const double EPSILON = 1e-4;
 
 #endif // CONST_H

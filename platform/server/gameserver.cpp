@@ -27,9 +27,11 @@ void GameServer::run() {
     for (int i = 0; i < 3000; i ++) {
         ServerTimer::msleep(100);
         gameInfo.round = i;
+        cout << gameInfo.round << " ";
         calc();
         if (gameInfo.gameStatus == BATTLE) genRep();
         updateGameInfo(gameInfo, newBullets, planeActions);
+        cout << gameInfo.score << endl;
         send(bossSendSocket, planeSendSocket);
         if (gameInfo.gameStatus != BATTLE) break;
     }
@@ -127,7 +129,7 @@ void GameServer::calc() {
         }
 
         if (hit) gameInfo.gameStatus = BOSS_WIN;
-        else if (gameInfo.round == 299) gameInfo.gameStatus = PLANE_WIN;
+        else if (gameInfo.round == 2999) gameInfo.gameStatus = PLANE_WIN;
     }
 }
 
@@ -139,12 +141,12 @@ void GameServer::genRep() {
             tmp.push_back(bullet);
     }
     fprintf(repFile, "%d\n", tmp.size());
-    fprintf(repFile, "Round = %d\n", gameInfo.round);
+    fprintf(repFile, "Round = %d Score = %d\n", gameInfo.round, gameInfo.score);
     fprintf(repFile, "newBullets.size = %d, planeActions.size = %d\n", newBullets.size(), planeActions.size());
     fprintf(repFile, "300 600\n");
     fprintf(repFile, "%lf %lf\n", gameInfo.planeX, gameInfo.planeY);
     for (int i = 0; i < tmp.size(); i ++)
-        fprintf(repFile, "%lf %lf %lf %lf\n", tmp[i].x, tmp[i].y, tmp[i].vx * 10, tmp[i].vy * 10);
+        fprintf(repFile, "%lf %lf %lf %lf\n", BULLET_X, BULLET_Y, tmp[i].vx * 10, tmp[i].vy * 10);
     fprintf(repFile, "\n");
 }
 
@@ -166,10 +168,15 @@ void GameServer::send(QTcpSocket* bossSocket, QTcpSocket* planeSocket) {
 
 bool GameServer::isValidNewBullet(const NewBullet &bullet) {
     if (bullet.initTime < gameInfo.round) return false;
+    if (bullet.vy > 0) return false;
+    double v = bullet.vx*bullet.vx + bullet.vy*bullet.vy;
+    if (fabs(v - BULLET_V*BULLET_V) > EPSILON) return false;
     return true;
 }
 
 bool GameServer::isValidPlaneAction(const PlaneAction &action) {
     if (action.startTime < gameInfo.round) return false;
+    double v = action.dx*action.dx + action.dy*action.dy;
+    if (v > PLANE_V*PLANE_V) return false;
     return true;
 }

@@ -45,8 +45,6 @@ void sendBossActions(QTcpSocket *socket, const vector<NewBullet> &newBullets) {
     out << (quint32)newBullets.size();
     for (int i = 0; i < newBullets.size(); i ++) {
         out << newBullets[i].initTime;
-        out << newBullets[i].x;
-        out << newBullets[i].y;
         out << newBullets[i].vx;
         out << newBullets[i].vy;
     }
@@ -64,8 +62,6 @@ void sendBossActions(QTcpSocket *socket, const vector<NewBullet> &newBullets, in
     out << (quint32)(end - start);
     for (int i = start; i < end; i ++) {
         out << newBullets[i].initTime;
-        out << newBullets[i].x;
-        out << newBullets[i].y;
         out << newBullets[i].vx;
         out << newBullets[i].vy;
     }
@@ -89,8 +85,6 @@ void recvBossActions(QTcpSocket *socket, vector<NewBullet> &newBullets) {
     for (int i = 0; i < size; i ++) {
         NewBullet newBullet;
         in >> newBullet.initTime;
-        in >> newBullet.x;
-        in >> newBullet.y;
         in >> newBullet.vx;
         in >> newBullet.vy;
         newBullets.push_back(newBullet);
