@@ -1,6 +1,6 @@
 #include "gameclient.h"
 
-GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType, char*aiFile) {
+GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType, char* aiFile) {
     this->serverAddr = serverAddr;
     this->serverPort = serverPort;
     this->clientType = clientType;
@@ -30,8 +30,10 @@ void GameClient::run() {
         prevRound = recvGameInfo.round;
         update();
         vector<PlaneAction> planeActions;
-        getActions(planeActions);
+        string msg;
+        getActions(planeActions, msg);
         sendString(sendSocket, QString("actions"));
+        sendString(sendSocket, QString(msg.c_str()));
         sendPlaneActions(sendSocket, planeActions);
     }
 
@@ -72,7 +74,7 @@ void GameClient::update() {
     updateGameInfo(recvGameInfo, recvNewBullets, recvPlaneActions);
 }
 
-void GameClient::getActions(vector<PlaneAction> &planeActions) {
-    callGetAction(recvGameInfo, planeActions);
+void GameClient::getActions(vector<PlaneAction> &planeActions, string& msg) {
+    callGetAction(recvGameInfo, planeActions, msg);
 }
 

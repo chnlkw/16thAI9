@@ -7,7 +7,7 @@
 #include "clientreceiverthread.h"
 
 typedef void (*funcInit) (string&);
-typedef void (*funcGetAction) (const GameInfo& gameInfo, vector<PlaneAction>& planeActions);
+typedef void (*funcGetAction) (const GameInfo& gameInfo, vector<PlaneAction>& planeActions, string& msg);
 
 class GameClient {
 public:
@@ -33,7 +33,7 @@ private:
     void init();
     void shakeHands();
     void update();
-    void getActions(vector<PlaneAction>& planeActions);
+    void getActions(vector<PlaneAction>& planeActions, string& msg);
 };
 
 #endif // GAMECLIENT_H

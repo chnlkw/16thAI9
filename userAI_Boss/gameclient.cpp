@@ -30,8 +30,10 @@ void GameClient::run() {
         prevRound = recvGameInfo.round;
         update();
         vector<NewBullet> newBullets;
-        getActions(newBullets);
+        string msg;
+        getActions(newBullets, msg);
         sendString(sendSocket, QString("actions"));
+        sendString(sendSocket, QString(msg.c_str()));
         sendBossActions(sendSocket, newBullets);
     }
 
@@ -71,6 +73,6 @@ void GameClient::update() {
     updateGameInfo(recvGameInfo, recvNewBullets, recvPlaneActions);
 }
 
-void GameClient::getActions(vector<NewBullet> &newBullets) {
-    callGetAction(recvGameInfo, newBullets);
+void GameClient::getActions(vector<NewBullet> &newBullets, string& msg) {
+    callGetAction(recvGameInfo, newBullets, msg);
 }

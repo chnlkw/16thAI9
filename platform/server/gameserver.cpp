@@ -7,13 +7,6 @@ GameServer::GameServer() {
     gameInfo.planeY = PLANE_INIT_Y;
     cntRecvNewBulletsNum = cntRecvPlaneActionsNum = 0;
     cntSendNewBulletsNum = cntSendPlaneActionsNum = 0;
-    repFile = fopen("record.txt", "w");
-    fprintf(repFile, "0\n");
-    fprintf(repFile, "I'm Boss\n");
-    fprintf(repFile, "I'm Player\n");
-    fprintf(repFile, "300 600\n");
-    fprintf(repFile, "300 100\n");
-    fprintf(repFile, "\n");
 }
 
 void GameServer::run() {
@@ -24,13 +17,19 @@ void GameServer::run() {
 
     gameInfo.gameStatus = BATTLE;
 
-    for (int i = 0; i < 3000; i ++) {
+    repFile = fopen("record.txt", "w");
+    fprintf(repFile, "%s\n", players[(int)BOSS].name.toStdString().c_str());
+    fprintf(repFile, "%s\n", players[(int)PLANE].name.toStdString().c_str());
+    fprintf(repFile, "\n");
+
+    for (int i = 0; i <= 3000; i ++) {
         ServerTimer::msleep(100);
         gameInfo.round = i;
         cout << gameInfo.round << " ";
         calc();
-        if (gameInfo.gameStatus == BATTLE) genRep();
+        int prevScore = gameInfo.score;
         updateGameInfo(gameInfo, newBullets, planeActions);
+        genRep(gameInfo.score - prevScore);
         cout << gameInfo.score << endl;
         send(bossSendSocket, planeSendSocket);
         if (gameInfo.gameStatus != BATTLE) break;
@@ -54,13 +53,13 @@ void GameServer::shakeHands() {
             recvString(socket, players[clientType].name);
             if ((CLIENT_TYPE)clientType == BOSS) {
                 cout << "boss sender" << endl;
-                bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, this);
+                bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, &recvBossMsg, this);
                 connect(bossRecvThread, SIGNAL(finished()), bossRecvThread, SLOT(deleteLater()));
                 bossRecvThread->start();
                 sendString(socket, QString("shake hand over"));
             } else {
                 cout << "plane sender" << endl;
-                planeRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvPlaneActions, this);
+                planeRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvPlaneActions, &recvPlaneMsg, this);
                 connect(planeRecvThread, SIGNAL(finished()), planeRecvThread, SLOT(deleteLater()));
                 planeRecvThread->start();
                 sendString(socket, QString("shake hand over"));
@@ -129,11 +128,11 @@ void GameServer::calc() {
         }
 
         if (hit) gameInfo.gameStatus = BOSS_WIN;
-        else if (gameInfo.round == 2999) gameInfo.gameStatus = PLANE_WIN;
+        else if (gameInfo.round == 3000) gameInfo.gameStatus = PLANE_WIN;
     }
 }
 
-void GameServer::genRep() {
+void GameServer::genRep(int move) {
     vector<NewBullet> tmp;
     for (int i = 0; i < newBullets.size(); i ++) {
         NewBullet& bullet = newBullets[i];
@@ -141,12 +140,12 @@ void GameServer::genRep() {
             tmp.push_back(bullet);
     }
     fprintf(repFile, "%d\n", tmp.size());
-    fprintf(repFile, "Round = %d Score = %d\n", gameInfo.round, gameInfo.score);
-    fprintf(repFile, "newBullets.size = %d, planeActions.size = %d\n", newBullets.size(), planeActions.size());
-    fprintf(repFile, "300 600\n");
-    fprintf(repFile, "%lf %lf\n", gameInfo.planeX, gameInfo.planeY);
+    fprintf(repFile, "%d %d\n", gameInfo.round, gameInfo.score);
+    fprintf(repFile, "%s\n", recvBossMsg.toStdString().c_str());
+    fprintf(repFile, "%s\n", recvPlaneMsg.toStdString().c_str());
+    fprintf(repFile, "%lf %lf %d\n", gameInfo.planeX, gameInfo.planeY, move);
     for (int i = 0; i < tmp.size(); i ++)
-        fprintf(repFile, "%lf %lf %lf %lf\n", BULLET_X, BULLET_Y, tmp[i].vx * 10, tmp[i].vy * 10);
+        fprintf(repFile, "%lf %lf\n", tmp[i].vx, tmp[i].vy);
     fprintf(repFile, "\n");
 }
 

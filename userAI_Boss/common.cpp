@@ -20,7 +20,7 @@ void updateGameInfo(GameInfo &gameInfo, const vector<NewBullet> &newBullets, con
     if (planeX > WIDTH) planeX = WIDTH;
     if (planeY < 0) planeY = 0;
     if (planeY > HEIGHT) planeY = HEIGHT;
-    if (fabs(gameInfo.planeX - planeX) < EPSILON && fabs(gameInfo.planeY - planeY) < EPSILON)
+    if (gameInfo.round > 1 && fabs(gameInfo.planeX - planeX) < EPSILON && fabs(gameInfo.planeY - planeY) < EPSILON)
         gameInfo.score ++;
     gameInfo.planeX = planeX;
     gameInfo.planeY = planeY;

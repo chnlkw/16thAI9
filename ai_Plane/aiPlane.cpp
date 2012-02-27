@@ -14,7 +14,7 @@ void init(string& name) {
 	name = "plane";
 }
 
-void getAction(const GameInfo& gameInfo, vector<PlaneAction>& planeActions) {
+void getAction(const GameInfo& gameInfo, vector<PlaneAction>& planeActions, string& msg) {
 	/*PlaneAction planeAction;
     planeAction.startTime = gameInfo.round * 10 + 1;
     planeAction.endTime = gameInfo.round * 10 + 11;
@@ -29,7 +29,8 @@ void getAction(const GameInfo& gameInfo, vector<PlaneAction>& planeActions) {
     planeAction.startTime = gameInfo.round + 1;
     planeAction.endTime = gameInfo.round + 2;
     planeAction.dx = 0;
-    planeAction.dy = 20;
+    planeAction.dy = PLANE_V;
     planeActions.push_back(planeAction);
+    msg = "I'm plane.";
 }
 

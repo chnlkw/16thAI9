@@ -14,7 +14,7 @@ public:
 private:
     void shakeHands();
     void calc();
-    void genRep();
+    void genRep(int move);
     void send(QTcpSocket* bossSocket, QTcpSocket* planeSocket);
     bool isValidNewBullet(const NewBullet& bullet);
     bool isValidPlaneAction(const PlaneAction& action);
@@ -30,6 +30,7 @@ private:
 
     vector<NewBullet> recvNewBullets, newBullets;
     vector<PlaneAction> recvPlaneActions, planeActions;
+    QString recvBossMsg, recvPlaneMsg;
 
     ServerReceiverThread *bossRecvThread, *planeRecvThread;
 

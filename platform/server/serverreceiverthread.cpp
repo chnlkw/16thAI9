@@ -1,20 +1,22 @@
 #include "serverreceiverthread.h"
 
-ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QObject *parent) :
+ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QString* msg, QObject *parent) :
     QThread(parent)
 {
     socket = new QTcpSocket(this);
     socket->setSocketDescriptor(socketDescriptor);
     this->newBullets = newBullets;
+    this->msg = msg;
     clientType = BOSS;
 }
 
-ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<PlaneAction>* planeActions, QObject *parent) :
+ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<PlaneAction>* planeActions, QString* msg, QObject *parent) :
     QThread(parent)
 {
     socket = new QTcpSocket(this);
     socket->setSocketDescriptor(socketDescriptor);
     this->planeActions = planeActions;
+    this->msg = msg;
     clientType = PLANE;
 }
 
@@ -23,6 +25,8 @@ void ServerReceiverThread::run() {
         QString clientStatus;
         recvString(socket, clientStatus);
         if (clientStatus == "close") break;
+
+        recvString(socket, *msg);
 
         if (clientType == BOSS) {
             recvBossActions(socket, *newBullets);

@@ -14,7 +14,7 @@ void init(string& name) {
   name = "boss";
 }
 
-void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets) {
+void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets, string& msg) {
 	/*for (int i = 0; i < 10; i ++) {
 		NewBullet newBullet;
 		newBullet.initTime = gameInfo.round + 1;
@@ -29,7 +29,8 @@ void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets) {
 	NewBullet newBullet;
 	newBullet.initTime = gameInfo.round + 1;
 	newBullet.vx = 0;
-	newBullet.vy = BULLET_V;
+	newBullet.vy = -BULLET_V;
 	newBullets.push_back(newBullet);
+	msg = "I'm boss.";
 }
 
