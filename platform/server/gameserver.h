@@ -13,23 +13,28 @@ public:
 
 private:
     void shakeHands();
-    void calc();
-    void genRep(int move);
-    void send(QTcpSocket* bossSocket, QTcpSocket* planeSocket);
+    void send();
+    void recv();
+    void judge(const GameInfo& cntGameInfo, const vector<int>& newBulletsId);
+    void genRep(const GameInfo& cntGameInfo, const vector<int>& newBulletsId);
+    void updateGameInfo(vector<int>& newBulletsId);
     bool isValidNewBullet(const NewBullet& bullet);
-    bool isValidPlaneAction(const PlaneAction& action);
+    bool isValidMove(const Move& move);
+    bool isValidSkill(const Skill& skill);
 
     FILE* repFile;
 
     Player players[2];
     GameInfo gameInfo;
+    int lastSpeedup;
+    bool useBomb;
 
-    int cntRecvNewBulletsNum, cntRecvPlaneActionsNum;
-    int cntSendNewBulletsNum, cntSendPlaneActionsNum;
+    int cntRecvNewBulletsNum, cntRecvMovesNum, cntRecvSkillsNum;
     QTcpSocket* bossSendSocket, *planeSendSocket;
 
     vector<NewBullet> recvNewBullets, newBullets;
-    vector<PlaneAction> recvPlaneActions, planeActions;
+    vector<Move> recvMoves, moves;
+    vector<Skill> recvSkills, skills;
     QString recvBossMsg, recvPlaneMsg;
 
     ServerReceiverThread *bossRecvThread, *planeRecvThread;

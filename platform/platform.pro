@@ -11,11 +11,11 @@ HEADERS += \
 
 SOURCES += \
     common/common.cpp \
-    common/utils.cpp \
     server/gameserver.cpp \
     common/network.cpp \
     server/main.cpp \
     server/serverreceiverthread.cpp
 
 QT += network
+
 

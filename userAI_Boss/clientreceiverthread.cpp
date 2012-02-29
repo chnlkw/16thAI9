@@ -2,7 +2,6 @@
 
 ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType,
                                            GameInfo* gameInfo,
-                                           vector<NewBullet>* newBullets, vector<PlaneAction>* planeActions,
                                            QObject *parent) :
     QThread(parent)
 {
@@ -10,8 +9,6 @@ ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serv
     this->serverPort = serverPort;
     this->clientType = clientType;
     this->gameInfo = gameInfo;
-    this->newBullets = newBullets;
-    this->planeActions = planeActions;
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
@@ -23,8 +20,6 @@ void ClientReceiverThread::run() {
         if (serverStatus == "close") break;
         assert(serverStatus == "actions");
         recvGameInfo(recvSocket, *gameInfo);
-        recvBossActions(recvSocket, *newBullets);
-        recvPlaneActions(recvSocket, *planeActions);
     }
     recvSocket->disconnectFromHost();
 }
@@ -40,6 +35,4 @@ void ClientReceiverThread::shakeHands() {
     sendInt(recvSocket, (int)clientType);
     recvString(recvSocket, s);
     assert(s == "shake hand over");
-
-    cout << "boss recver shake hand over" << endl;
 }

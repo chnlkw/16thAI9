@@ -15,22 +15,20 @@ void init(string& name) {
 }
 
 void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets, string& msg) {
-	/*for (int i = 0; i < 10; i ++) {
+	for (int i = 0; i < 10; i ++) {
 		NewBullet newBullet;
-		newBullet.initTime = gameInfo.round + 1;
-		newBullet.x = 300;
-		newBullet.y = 600;
+		newBullet.initTime = gameInfo.round;
 		int t = randNum[cntRand++] % 2;
 		int p = (t == 1 ? 1 : -1);
 		newBullet.vx = p * (randNum[cntRand++] % 200);
 		newBullet.vy = -1 * (randNum[cntRand++] % 200 + 1);
 		newBullets.push_back(newBullet);
-	}*/
-	NewBullet newBullet;
-	newBullet.initTime = gameInfo.round + 1;
+	}
+	/*NewBullet newBullet;
+	newBullet.initTime = gameInfo.round;
 	newBullet.vx = 0;
-	newBullet.vy = -BULLET_V;
+	newBullet.vy = -BULLET_V[4];
 	newBullets.push_back(newBullet);
-	msg = "I'm boss.";
+	msg = "I'm boss.";*/
 }
 

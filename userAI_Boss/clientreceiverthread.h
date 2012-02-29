@@ -11,7 +11,6 @@ class ClientReceiverThread : public QThread
 public:
     explicit ClientReceiverThread(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType,
                                   GameInfo* gameInfo,
-                                  vector<NewBullet>* newBullets, vector<PlaneAction>* planeActions,
                                   QObject *parent = 0);
     void run();
 
@@ -25,8 +24,6 @@ private:
     CLIENT_TYPE clientType;
 
     GameInfo* gameInfo;
-    vector<NewBullet>* newBullets;
-    vector<PlaneAction>* planeActions;
 
     QTcpSocket* recvSocket;
 

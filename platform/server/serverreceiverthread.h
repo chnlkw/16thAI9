@@ -11,7 +11,7 @@ class ServerReceiverThread : public QThread
     Q_OBJECT
 public:
     explicit ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QString* msg, QObject *parent = 0);
-    explicit ServerReceiverThread(int socketDescriptor, vector<PlaneAction>* planeActions, QString* msg, QObject *parent = 0);
+    explicit ServerReceiverThread(int socketDescriptor, vector<Move>* moves, vector<Skill>* skills, QString* msg, QObject *parent = 0);
     void run();
 
 signals:
@@ -22,7 +22,8 @@ private:
     CLIENT_TYPE clientType;
     QTcpSocket* socket;
     vector<NewBullet>* newBullets;
-    vector<PlaneAction>* planeActions;
+    vector<Move>* moves;
+    vector<Skill>* skills;
     QString* msg;
 
 };

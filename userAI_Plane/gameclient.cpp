@@ -26,15 +26,16 @@ void GameClient::run() {
         Timer::msleep(1);
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
-        if (prevRound == recvGameInfo.round) continue;
-        prevRound = recvGameInfo.round;
-        update();
-        vector<PlaneAction> planeActions;
+        if (gameInfo.round == recvGameInfo.round) continue;
+        gameInfo = recvGameInfo;
+        vector<Move> moves;
+        vector<Skill> skills;
         string msg;
-        getActions(planeActions, msg);
+        getActions(moves, skills, msg);
         sendString(sendSocket, QString("actions"));
         sendString(sendSocket, QString(msg.c_str()));
-        sendPlaneActions(sendSocket, planeActions);
+        sendMoves(sendSocket, moves);
+        sendSkills(sendSocket, skills);
     }
 
     // The last action, send a string 'close'.
@@ -62,19 +63,12 @@ void GameClient::shakeHands() {
     recvString(sendSocket, s);
     assert(s == "shake hand over");
 
-    cout << "plane sender shake hand over" << endl;
-
-    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo,
-                                          &recvNewBullets, &recvPlaneActions);
+    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo);
 
     recvThread->start();
 }
 
-void GameClient::update() {
-    updateGameInfo(recvGameInfo, recvNewBullets, recvPlaneActions);
-}
-
-void GameClient::getActions(vector<PlaneAction> &planeActions, string& msg) {
-    callGetAction(recvGameInfo, planeActions, msg);
+void GameClient::getActions(vector<Move>& moves, vector<Skill>& skills, string& msg) {
+    callGetAction(gameInfo, moves, skills, msg);
 }
 

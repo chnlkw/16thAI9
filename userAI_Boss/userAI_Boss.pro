@@ -5,9 +5,7 @@ SOURCES += \
     main.cpp \
     gameclient.cpp \
     network.cpp \
-    clientreceiverthread.cpp \
-    common.cpp \
-    utils.cpp
+    clientreceiverthread.cpp
 
 HEADERS += \
     gameclient.h \
@@ -18,3 +16,5 @@ HEADERS += \
     clientreceiverthread.h
 
 QT += network
+
+

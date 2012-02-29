@@ -22,8 +22,7 @@ private:
     ClientReceiverThread* recvThread;
 
     GameInfo recvGameInfo;
-    vector<NewBullet> recvNewBullets;
-    vector<PlaneAction> recvPlaneActions;
+    GameInfo gameInfo;
 
     funcInit callInit;
     funcGetAction callGetAction;
@@ -32,7 +31,6 @@ private:
 
     void init();
     void shakeHands();
-    void update();
     void getActions(vector<NewBullet>& newBullets, string& msg);
 };
 

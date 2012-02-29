@@ -14,7 +14,7 @@ void init(string& name) {
 	name = "plane";
 }
 
-void getAction(const GameInfo& gameInfo, vector<PlaneAction>& planeActions, string& msg) {
+void getAction(const GameInfo& gameInfo, vector<Move>& moves, vector<Skill>& skills, string& msg) {
 	/*PlaneAction planeAction;
     planeAction.startTime = gameInfo.round * 10 + 1;
     planeAction.endTime = gameInfo.round * 10 + 11;
@@ -25,12 +25,13 @@ void getAction(const GameInfo& gameInfo, vector<PlaneAction>& planeActions, stri
     p = (t == 1 ? 1 : -1);
     planeAction.dy = p * (randNum[cntRand++] % 10 + 1);
     planeActions.push_back(planeAction);*/
-    PlaneAction planeAction;
-    planeAction.startTime = gameInfo.round + 1;
-    planeAction.endTime = gameInfo.round + 2;
-    planeAction.dx = 0;
-    planeAction.dy = PLANE_V;
-    planeActions.push_back(planeAction);
+    cout << gameInfo.planeX << "," << gameInfo.planeY << endl;
+    Move move;
+    move.startTime = gameInfo.round;
+    move.endTime = gameInfo.round + 1;
+    move.vx = 0;
+    move.vy = PLANE_V;
+    moves.push_back(move);
     msg = "I'm plane.";
 }
 

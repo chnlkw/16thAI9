@@ -17,9 +17,14 @@ struct Bullet {
     double vx, vy;
 };
 
-struct PlaneAction {
+struct Move {
     int startTime, endTime;
-    double dx, dy;
+    double vx, vy;
+};
+
+struct Skill {
+    int startTime;
+    PLANE_SKILLS type;
 };
 
 struct Player {
@@ -30,10 +35,9 @@ struct Player {
 struct GameInfo {
     int round, score;
     GAME_STATUS gameStatus;
+    int planeSkillsNum[2];
     double planeX, planeY;
     vector<Bullet> bullets;
 };
-
-void updateGameInfo(GameInfo& gameInfo, const vector<NewBullet>& newBullets, const vector<PlaneAction>& planeActions);
 
 #endif // COMMON_H

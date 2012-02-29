@@ -10,12 +10,13 @@ ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<NewBulle
     clientType = BOSS;
 }
 
-ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<PlaneAction>* planeActions, QString* msg, QObject *parent) :
+ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<Move>* moves, vector<Skill>* skills, QString* msg, QObject *parent) :
     QThread(parent)
 {
     socket = new QTcpSocket(this);
     socket->setSocketDescriptor(socketDescriptor);
-    this->planeActions = planeActions;
+    this->moves = moves;
+    this->skills = skills;
     this->msg = msg;
     clientType = PLANE;
 }
@@ -25,19 +26,12 @@ void ServerReceiverThread::run() {
         QString clientStatus;
         recvString(socket, clientStatus);
         if (clientStatus == "close") break;
-
         recvString(socket, *msg);
-
         if (clientType == BOSS) {
             recvBossActions(socket, *newBullets);
-            NewBullet& bullet = (*newBullets)[0];
-//            cout << "recv bullet " << bullet.initTime << " " << bullet.x << "," << bullet.y <<
-//                    " " << bullet.vx << "," << bullet.vy << endl;
         } else {
-            recvPlaneActions(socket, *planeActions);
-            PlaneAction& act = (*planeActions)[0];
-//            cout << "recv act " << act.startTime << "," << act.endTime <<
-//                    " " << act.dx << "," << act.dy << endl;
+            recvMoves(socket, *moves);
+            recvSkills(socket, *skills);
         }
     }
 }

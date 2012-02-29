@@ -14,9 +14,13 @@ void sendBossActions(QTcpSocket* socket, const vector<NewBullet>& newBullets);
 void sendBossActions(QTcpSocket* socket, const vector<NewBullet>& newBullets, int start, int end);
 void recvBossActions(QTcpSocket* socket, vector<NewBullet>& newBullets);
 
-void sendPlaneActions(QTcpSocket* socket, const vector<PlaneAction>& planeActions);
-void sendPlaneActions(QTcpSocket* socket, const vector<PlaneAction>& planeActions, int start, int end);
-void recvPlaneActions(QTcpSocket* socket, vector<PlaneAction>& planeActions);
+void sendMoves(QTcpSocket* socket, const vector<Move>& moves);
+void sendMoves(QTcpSocket* socket, const vector<Move>& moves, int start, int end);
+void recvMoves(QTcpSocket* socket, vector<Move>& moves);
+
+void sendSkills(QTcpSocket* socket, const vector<Skill>& skills);
+void sendSkills(QTcpSocket* socket, const vector<Skill>& skills, int start, int end);
+void recvSkills(QTcpSocket* socket, vector<Skill>& skills);
 
 void sendGameInfo(QTcpSocket* socket, const GameInfo& gameInfo);
 void recvGameInfo(QTcpSocket* socket, GameInfo& gameInfo);

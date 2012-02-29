@@ -9,12 +9,13 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SQR(a) ((a) * (a))
 
 class Timer : public QThread
 {
     Q_OBJECT
 public:
-    explicit Timer(QObject *parent = 0);
+    explicit Timer(QObject *parent = 0) : QThread(parent) {}
     static void msleep(unsigned long secs) { QThread::msleep(secs); }
 };
 

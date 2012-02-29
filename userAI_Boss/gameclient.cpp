@@ -20,15 +20,12 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
 void GameClient::run() {
     shakeHands();
 
-    int prevRound = -1;
-
     while (true) {
         Timer::msleep(1);
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
-        if (prevRound == recvGameInfo.round) continue;
-        prevRound = recvGameInfo.round;
-        update();
+        if (gameInfo.round == recvGameInfo.round) continue;
+        gameInfo = recvGameInfo;
         vector<NewBullet> newBullets;
         string msg;
         getActions(newBullets, msg);
@@ -62,17 +59,10 @@ void GameClient::shakeHands() {
     recvString(sendSocket, s);
     assert(s == "shake hand over");
 
-    cout << "boss sender shake hand over" << endl;
-
-    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo,
-                                          &recvNewBullets, &recvPlaneActions);
+    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo);
     recvThread->start();
 }
 
-void GameClient::update() {
-    updateGameInfo(recvGameInfo, recvNewBullets, recvPlaneActions);
-}
-
 void GameClient::getActions(vector<NewBullet> &newBullets, string& msg) {
-    callGetAction(recvGameInfo, newBullets, msg);
+    callGetAction(gameInfo, newBullets, msg);
 }
