@@ -1,6 +1,6 @@
 #include "gameserver.h"
 
-GameServer::GameServer() {
+GameServer::GameServer(int gui) {
     gameInfo.gameStatus = INIT;
     gameInfo.score = 0;
     gameInfo.planeX = PLANE_INIT_X;
@@ -8,11 +8,14 @@ GameServer::GameServer() {
     memset(gameInfo.planeSkillsNum, 0, sizeof(gameInfo.planeSkillsNum));
     cntRecvNewBulletsNum = cntRecvMovesNum = cntRecvSkillsNum = 0;
     lastSpeedup = 10000;
+    hasGui = gui;
 }
 
 void GameServer::run() {
     this->listen(SERVER_ADDR, SERVER_PORT);
+    cout << "begin shake hands" << endl;
     shakeHands();
+    cout << "shake hands over" << endl;
 
     gameInfo.gameStatus = BATTLE;
 
@@ -34,21 +37,30 @@ void GameServer::run() {
         genRep(cntGameInfo, newBulletsId);  // gen the rep of round i
     }
 
+    sendString(bossSendSocket, QString("close"));
+    sendString(planeSendSocket, QString("close"));
+    if (hasGui) sendString(guiSendSocket, QString("close"));
+
     fclose(repFile);
+
+    Timer::msleep(1000);
 }
 
 void GameServer::shakeHands() {
-    for (int i = 0; i < 4; i ++) {
+    for (int i = 0; i < 4 + hasGui; i ++) {
         this->waitForNewConnection(-1);
         QTcpSocket* socket = this->nextPendingConnection();
         sendString(socket, QString("accepted"));
 
         QString sr;
         recvString(socket, sr);
-        int clientType;
-        recvInt(socket, clientType);
-        players[clientType].socketDescriptor = socket->socketDescriptor();
-        if (sr == "client sender") {            
+
+        cout << sr.toStdString() << endl;
+
+        //players[clientType].socketDescriptor = socket->socketDescriptor();
+        if (sr == "client sender") {
+            int clientType;
+            recvInt(socket, clientType);
             recvString(socket, players[clientType].name);
             if ((CLIENT_TYPE)clientType == BOSS) {
                 bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, &recvBossMsg, this);
@@ -62,6 +74,8 @@ void GameServer::shakeHands() {
                 sendString(socket, QString("shake hand over"));
             }
         } else if (sr == "client recver") {
+            int clientType;
+            recvInt(socket, clientType);
             if ((CLIENT_TYPE)clientType == BOSS) {
                 bossSendSocket = new QTcpSocket();
                 bossSendSocket->setSocketDescriptor(socket->socketDescriptor());
@@ -71,6 +85,10 @@ void GameServer::shakeHands() {
                 planeSendSocket->setSocketDescriptor(socket->socketDescriptor());
                 sendString(socket, QString("shake hand over"));
             }
+        } else if (sr == "gui") {
+            guiSendSocket = new QTcpSocket();
+            guiSendSocket->setSocketDescriptor(socket->socketDescriptor());
+            sendString(socket, QString("shake hand over"));
         }
     }
 }
@@ -236,6 +254,11 @@ void GameServer::send() {
     sendString(planeSendSocket, QString("actions"));
     sendGameInfo(bossSendSocket, gameInfo);
     sendGameInfo(planeSendSocket, gameInfo);
+    if (hasGui) {
+        sendString(guiSendSocket, QString("actions"));
+        sendInt(guiSendSocket, gameInfo.round);
+        sendInt(guiSendSocket, gameInfo.score);
+    }
 }
 
 void GameServer::recv() {

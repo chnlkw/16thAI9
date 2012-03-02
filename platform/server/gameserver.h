@@ -8,7 +8,7 @@
 class GameServer : public QTcpServer {
     Q_OBJECT
 public:
-    GameServer();
+    GameServer(int gui);
     void run();
 
 private:
@@ -28,9 +28,10 @@ private:
     GameInfo gameInfo;
     int lastSpeedup;
     bool useBomb;
+    int hasGui;
 
     int cntRecvNewBulletsNum, cntRecvMovesNum, cntRecvSkillsNum;
-    QTcpSocket* bossSendSocket, *planeSendSocket;
+    QTcpSocket* bossSendSocket, *planeSendSocket, *guiSendSocket;
 
     vector<NewBullet> recvNewBullets, newBullets;
     vector<Move> recvMoves, moves;
