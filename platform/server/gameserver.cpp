@@ -7,7 +7,7 @@ GameServer::GameServer(int gui) {
     gameInfo.planeY = PLANE_INIT_Y;
     memset(gameInfo.planeSkillsNum, 0, sizeof(gameInfo.planeSkillsNum));
     cntRecvNewBulletsNum = cntRecvMovesNum = cntRecvSkillsNum = 0;
-    lastSpeedup = 10000;
+    lastSpeedup = -10000;
     hasGui = gui;
 }
 
@@ -22,6 +22,15 @@ void GameServer::run() {
     repFile = fopen("record.txt", "w");
     fprintf(repFile, "%s\n", players[(int)BOSS].name.toStdString().c_str());
     fprintf(repFile, "%s\n", players[(int)PLANE].name.toStdString().c_str());
+    fprintf(repFile, "\n");
+
+    fprintf(repFile, "0\n");
+    fprintf(repFile, "0 0\n");
+    fprintf(repFile, "Init boss.\n");
+    fprintf(repFile, "Init plane.\n");
+    fprintf(repFile, "%lf %lf\n", PLANE_INIT_X, PLANE_INIT_Y);
+    fprintf(repFile, "0 0\n");
+    fprintf(repFile, "0 0\n");
     fprintf(repFile, "\n");
 
     for (gameInfo.round = 1; gameInfo.round <= 3000; gameInfo.round ++) {
@@ -95,14 +104,7 @@ void GameServer::shakeHands() {
 
 void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBulletsId) {
     double xp = cntGameInfo.planeX, yp = cntGameInfo.planeY;
-    double dx = 0, dy = 0;
-    for (int i = 0; i < moves.size(); i ++) {
-        Move& act = moves[i];
-        if (act.startTime <= cntGameInfo.round) {
-            dx = act.vx;
-            dy = act.vy;
-        }
-    }
+    double dx = cntMoveX, dy = cntMoveY;
 
     bool hit = false;
     for (int i = 0; i < cntGameInfo.bullets.size(); i ++) {
@@ -113,12 +115,15 @@ void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBullet
         double b = 2*((xb - xp)*(vx - dx) + (yb - yp)*(vy - dy));
         int type = getBulletType(bullet.vx, bullet.vy);
         double c = SQR(xb - xp) + SQR(yb - yp) - SQR(BULLET_R[type]);
-        double min = MIN(a*0.01 + b*0.1 + c, c);
+        double min = MIN(a + b + c, c);
         double t = -b / (2*a);
-        if (0 <= t && t <= 0.1)
+        if (0 <= t && t <= 1)
             min = MIN(min, a*t*t + b*t + c);
         if (min <= 0) {
             hit = true;
+//            printf("hit: bullet: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", bullet.x, bullet.y, bullet.vx, bullet.vy);
+//            printf("plane: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", xp, yp, dx, dy);
+//            Timer::msleep(30000);
             break;
         }
     }
@@ -132,9 +137,9 @@ void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBullet
             double b = 2*((xb - xp)*(vx - dx) + (yb - yp)*(vy - dy));
             int type = getBulletType(bullet.vx, bullet.vy);
             double c = SQR(xb - xp) + SQR(yb - yp) - SQR(BULLET_R[type]);
-            double min = MIN(a*0.01 + b*0.1 + c, c);
+            double min = MIN(a + b + c, c);
             double t = -b / (2*a);
-            if (0 <= t && t <= 0.1)
+            if (0 <= t && t <= 1)
                 min = MIN(min, a*t*t + b*t + c);
             if (min <= 0) {
                 hit = true;
@@ -195,6 +200,10 @@ void GameServer::updateGameInfo(vector<int>& newBulletsId) {
         gameInfo.planeSkillsNum[0] ++;
     if (gameInfo.score > 0 && gameInfo.score % 100 == 0)
         gameInfo.planeSkillsNum[1] ++;
+
+    cntMoveX = planeX - gameInfo.planeX;
+    cntMoveY = planeY - gameInfo.planeY;
+
     gameInfo.planeX = planeX;
     gameInfo.planeY = planeY;
 
@@ -284,6 +293,14 @@ void GameServer::recv() {
             skills.push_back(skills[i]);
     }
 }
+
+int GameServer::getBulletType(double vx, double vy) {
+    for (int i = 0; i < 5; i ++)
+        if (fabs(SQR(vx)+SQR(vy) - SQR(BULLET_V[i])) < EPSILON)
+            return i;
+    return -1;
+}
+
 
 bool GameServer::isValidNewBullet(const NewBullet &bullet) {
     if (bullet.initTime < gameInfo.round) return false;

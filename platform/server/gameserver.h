@@ -18,6 +18,7 @@ private:
     void judge(const GameInfo& cntGameInfo, const vector<int>& newBulletsId);
     void genRep(const GameInfo& cntGameInfo, const vector<int>& newBulletsId);
     void updateGameInfo(vector<int>& newBulletsId);
+    int getBulletType(double vx, double vy);
     bool isValidNewBullet(const NewBullet& bullet);
     bool isValidMove(const Move& move);
     bool isValidSkill(const Skill& skill);
@@ -29,6 +30,7 @@ private:
     int lastSpeedup;
     bool useBomb;
     int hasGui;
+    double cntMoveX, cntMoveY;
 
     int cntRecvNewBulletsNum, cntRecvMovesNum, cntRecvSkillsNum;
     QTcpSocket* bossSendSocket, *planeSendSocket, *guiSendSocket;

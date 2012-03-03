@@ -40,6 +40,4 @@ struct GameInfo {
     vector<Bullet> bullets;
 };
 
-int getBulletType(double vx, double vy);
-
 #endif // COMMON_H

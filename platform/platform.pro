@@ -10,12 +10,12 @@ HEADERS += \
     server/serverreceiverthread.h
 
 SOURCES += \
-    common/common.cpp \
     server/gameserver.cpp \
     common/network.cpp \
     server/main.cpp \
     server/serverreceiverthread.cpp
 
 QT += network
+
 
 
