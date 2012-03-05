@@ -27,6 +27,7 @@ void ClientReceiverThread::run() {
 void ClientReceiverThread::shakeHands() {
     recvSocket = new QTcpSocket();
     recvSocket->connectToHost(serverAddr, serverPort);
+    recvSocket->waitForConnected();
 
     QString s;
     recvString(recvSocket, s);

@@ -121,9 +121,9 @@ void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBullet
             min = MIN(min, a*t*t + b*t + c);
         if (min <= 0) {
             hit = true;
-//            printf("hit: bullet: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", bullet.x, bullet.y, bullet.vx, bullet.vy);
-//            printf("plane: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", xp, yp, dx, dy);
-//            Timer::msleep(30000);
+            printf("hit: bullet: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", bullet.x, bullet.y, bullet.vx, bullet.vy);
+            printf("plane: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", xp, yp, dx, dy);
+            Timer::msleep(10000);
             break;
         }
     }
@@ -177,7 +177,7 @@ void GameServer::updateGameInfo(vector<int>& newBulletsId) {
         const Move& move = moves[i];
         if (move.endTime <= gameInfo.round) continue;
         if (move.startTime == gameInfo.round &&
-                SQR(move.vx) + SQR(move.vy) > SQR(PLANE_V) && lastSpeedup + SPEEDUP_TIME <= gameInfo.round)
+                SQR(move.vx) + SQR(move.vy) > SQR(PLANE_V) + EPSILON && lastSpeedup + SPEEDUP_TIME <= gameInfo.round)
             continue;
         validMoves.push_back(move);
         if (move.startTime <= gameInfo.round) {
@@ -194,18 +194,18 @@ void GameServer::updateGameInfo(vector<int>& newBulletsId) {
     if (planeY < 0) planeY = 0;
     if (planeY > HEIGHT) planeY = HEIGHT;
 
-    if (gameInfo.round > 1 && vx == 0 && vy == 0)
-        gameInfo.score ++;
-    if (gameInfo.score > 0 && gameInfo.score % 50 == 0)
-        gameInfo.planeSkillsNum[0] ++;
-    if (gameInfo.score > 0 && gameInfo.score % 100 == 0)
-        gameInfo.planeSkillsNum[1] ++;
-
     cntMoveX = planeX - gameInfo.planeX;
     cntMoveY = planeY - gameInfo.planeY;
 
     gameInfo.planeX = planeX;
     gameInfo.planeY = planeY;
+
+    if (cntMoveX == 0 && cntMoveY == 0)
+        gameInfo.score ++;
+    if (gameInfo.score > 0 && gameInfo.score % 50 == 0)
+        gameInfo.planeSkillsNum[0] ++;
+    if (gameInfo.score > 0 && gameInfo.score % 100 == 0)
+        gameInfo.planeSkillsNum[1] ++;
 
     // Calculate bullets
     vector<Bullet> bullets;
@@ -290,8 +290,9 @@ void GameServer::recv() {
     size = recvSkills.size();
     for (int i = cntRecvSkillsNum; i < size; i ++) {
         if (isValidSkill(recvSkills[i]))
-            skills.push_back(skills[i]);
+            skills.push_back(recvSkills[i]);
     }
+    cntRecvSkillsNum = size;
 }
 
 int GameServer::getBulletType(double vx, double vy) {
@@ -312,7 +313,7 @@ bool GameServer::isValidNewBullet(const NewBullet &bullet) {
 bool GameServer::isValidMove(const Move &move) {
     if (move.startTime < gameInfo.round) return false;
     double v = SQR(move.vx) + SQR(move.vy);
-    if (v > SQR(PLANE_V * 2)) return false;
+    if (v > SQR(PLANE_V * 2) + EPSILON) return false;
     return true;
 }
 
