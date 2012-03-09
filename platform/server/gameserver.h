@@ -8,7 +8,7 @@
 class GameServer : public QTcpServer {
     Q_OBJECT
 public:
-    GameServer(int gui);
+    GameServer(int gui, char* repFileName, int totRounds, int sleepTime);
     void run();
 
 private:
@@ -23,13 +23,17 @@ private:
     bool isValidMove(const Move& move);
     bool isValidSkill(const Skill& skill);
 
+    int gui;
+    char* repFileName;
+    int totRounds;
+    int sleepTime;
+
     FILE* repFile;
 
     Player players[2];
     GameInfo gameInfo;
     int lastSpeedup;
     bool useBomb;
-    int hasGui;
     double cntMoveX, cntMoveY;
 
     int cntRecvNewBulletsNum, cntRecvMovesNum, cntRecvSkillsNum;

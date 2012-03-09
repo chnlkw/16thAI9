@@ -10,7 +10,7 @@ class ClientReceiverThread : public QThread
     Q_OBJECT
 public:
     explicit ClientReceiverThread(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType,
-                                  GameInfo* gameInfo,
+                                  GameInfo* gameInfo, volatile bool* recvOverFlag,
                                   QObject *parent = 0);
     void run();
 
@@ -24,6 +24,7 @@ private:
     CLIENT_TYPE clientType;
 
     GameInfo* gameInfo;
+    volatile bool* recvOverFlag;
 
     QTcpSocket* recvSocket;
 

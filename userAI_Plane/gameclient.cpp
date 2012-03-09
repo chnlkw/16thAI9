@@ -20,13 +20,13 @@ GameClient::GameClient(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE 
 void GameClient::run() {
     shakeHands();
 
-    int prevRound = -1;
-
     while (true) {
         Timer::msleep(1);
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
         if (gameInfo.round == recvGameInfo.round) continue;
+        while (!recvOverFlag) continue;
+        //printf("main: %d %d\n", recvGameInfo.round, recvGameInfo.bullets.size());
         gameInfo = recvGameInfo;
         vector<Move> moves;
         vector<Skill> skills;
@@ -63,7 +63,7 @@ void GameClient::shakeHands() {
     recvString(sendSocket, s);
     assert(s == "shake hand over");
 
-    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo);
+    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo, &recvOverFlag);
 
     recvThread->start();
 }

@@ -25,6 +25,8 @@ void GameClient::run() {
         if (recvGameInfo.gameStatus == BOSS_WIN || recvGameInfo.gameStatus == PLANE_WIN) break;
         if (recvGameInfo.gameStatus != BATTLE) continue;
         if (gameInfo.round == recvGameInfo.round) continue;
+        while (!recvOverFlag) continue;
+        //printf("main: %d %d\n", recvGameInfo.round, recvGameInfo.bullets.size());
         gameInfo = recvGameInfo;
         vector<NewBullet> newBullets;
         string msg;
@@ -59,7 +61,7 @@ void GameClient::shakeHands() {
     recvString(sendSocket, s);
     assert(s == "shake hand over");
 
-    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo);
+    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo, &recvOverFlag);
     recvThread->start();
 }
 

@@ -1,7 +1,7 @@
 #include "clientreceiverthread.h"
 
 ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serverPort, CLIENT_TYPE clientType,
-                                           GameInfo* gameInfo,
+                                           GameInfo* gameInfo, volatile bool* recvOverFlag,
                                            QObject *parent) :
     QThread(parent)
 {
@@ -9,6 +9,7 @@ ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serv
     this->serverPort = serverPort;
     this->clientType = clientType;
     this->gameInfo = gameInfo;
+    this->recvOverFlag = recvOverFlag;
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
@@ -17,9 +18,15 @@ void ClientReceiverThread::run() {
     while (true) {
         QString serverStatus;
         recvString(recvSocket, serverStatus);
-        if (serverStatus == "close") break;
+        *recvOverFlag = false;
+        if (serverStatus == "close") {
+            *recvOverFlag = true;
+            break;
+        }
         assert(serverStatus == "actions");
         recvGameInfo(recvSocket, *gameInfo);
+        *recvOverFlag = true;
+        //printf("recv: %d %u set %d\n", gameInfo->round, gameInfo->bullets.size(), *recvOverFlag);
     }
     recvSocket->disconnectFromHost();
 }

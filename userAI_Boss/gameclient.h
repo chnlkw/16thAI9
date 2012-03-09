@@ -21,6 +21,7 @@ private:
     QTcpSocket* sendSocket;
     ClientReceiverThread* recvThread;
 
+    volatile bool recvOverFlag;
     GameInfo recvGameInfo;
     GameInfo gameInfo;
 
