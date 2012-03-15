@@ -30,18 +30,20 @@ enum PLANE_SKILLS {
     BOMB
 };
 
-const double WIDTH = 600;
-const double HEIGHT = 600;
+const double WIDTH = 1000;
+const double HEIGHT = 1000;
 
-const double BULLET_X = 300;
-const double BULLET_Y = 600;
-const double BULLET_V[5] = {12, 18, 24, 30, 36};
-const double BULLET_R[5] = {10, 10, 10, 10, 10};
+const double BULLET_X = 500;
+const double BULLET_Y = 800;
+const double BULLET_V[5] = {20, 28, 36, 44, 52};
+const double BULLET_R[5] = {8, 12, 16, 20, 24};
 const int BULLET_INIT_LIMIT[5] = {20, 18, 16, 14, 12};
 
-const double PLANE_INIT_X = 300;
+const double PLANE_INIT_X = 500;
 const double PLANE_INIT_Y = 100;
-const double PLANE_V = 30;
+const double PLANE_V = 40;
+const int GAIN_SPEEDUP = 50;
+const int GAIN_BOMB = 100;
 const int SPEEDUP_TIME = 30;
 
 const double EPSILON = 1e-4;

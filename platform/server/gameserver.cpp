@@ -16,9 +16,9 @@ GameServer::GameServer(int gui, char* repFileName, int totRounds, int sleepTime)
 
 void GameServer::run() {
     this->listen(SERVER_ADDR, SERVER_PORT);
-    cout << "begin shake hands" << endl;
+    //cout << "begin shake hands" << endl;
     shakeHands();
-    cout << "shake hands over" << endl;
+    //cout << "shake hands over" << endl;
 
     gameInfo.gameStatus = BATTLE;
 
@@ -50,6 +50,8 @@ void GameServer::run() {
     }
     if (gameInfo.round == totRounds + 1) send();
 
+    //printf("%d\n", gameInfo.score);
+
     sendString(bossSendSocket, QString("close"));
     sendString(planeSendSocket, QString("close"));
     if (gui) sendString(guiSendSocket, QString("close"));
@@ -68,7 +70,7 @@ void GameServer::shakeHands() {
         QString sr;
         recvString(socket, sr);
 
-        cout << sr.toStdString() << endl;
+        //cout << sr.toStdString() << endl;
 
         //players[clientType].socketDescriptor = socket->socketDescriptor();
         if (sr == "client sender") {
@@ -208,9 +210,9 @@ void GameServer::updateGameInfo(vector<int>& newBulletsId) {
 
     if (cntMoveX == 0 && cntMoveY == 0)
         gameInfo.score ++;
-    if (gameInfo.score > 0 && gameInfo.score % 50 == 0)
+    if (gameInfo.score > 0 && gameInfo.score % GAIN_SPEEDUP == 0)
         gameInfo.planeSkillsNum[0] ++;
-    if (gameInfo.score > 0 && gameInfo.score % 100 == 0)
+    if (gameInfo.score > 0 && gameInfo.score % GAIN_BOMB == 0)
         gameInfo.planeSkillsNum[1] ++;
 
     // Calculate bullets
@@ -317,7 +319,7 @@ int GameServer::getBulletType(double vx, double vy) {
 
 bool GameServer::isValidNewBullet(const NewBullet &bullet) {
     if (bullet.initTime < gameInfo.round) return false;
-    if (bullet.vy > 0) return false;
+    //if (bullet.vy > 0) return false;
     if (getBulletType(bullet.vx, bullet.vy) == -1) return false;
     return true;
 }
