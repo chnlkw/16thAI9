@@ -35,8 +35,8 @@ const double HEIGHT = 1000;
 
 const double BULLET_X = 500;
 const double BULLET_Y = 800;
-const double BULLET_V[5] = {20, 28, 36, 44, 52};
-const double BULLET_R[5] = {8, 12, 16, 20, 24};
+const double BULLET_V[5] = {32, 36, 40, 44, 48};
+const double BULLET_R[5] = {15, 15, 15, 15, 15};
 const int BULLET_INIT_LIMIT[5] = {20, 18, 16, 14, 12};
 
 const double PLANE_INIT_X = 500;

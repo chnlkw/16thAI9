@@ -450,7 +450,7 @@ void AirBattle::recv_server(int round, int score)
         rec = ans;
 
         ui->viewstart->setText(tr("²¥·Å"));
-        state = 1;
+        state = 4;
         playrecord(rec);
 
         swaptoframe();

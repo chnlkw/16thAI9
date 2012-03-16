@@ -4,8 +4,8 @@
 #define FRAPS 60.0
 #define WIDTH1 1000.0
 #define HEIGTH1 1000.0
-#define BOSS_WIDTH 100
-#define BOSS_HEIGTH 100
+#define BOSS_WIDTH 160
+#define BOSS_HEIGTH 160
 #define PLAYER_WIDTH 60
 #define PLAYER_HEIGTH 80
 #define BULLET_WIDTH 20.0
