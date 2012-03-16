@@ -12,8 +12,9 @@ Record::Record(GameCenter *game)
 void Record::GameInit()
 {
     timer = new QTimer;
-    timer->setInterval(1000*GAMESPEED);
+    timer->setInterval(1000*GAMESPEED+0.01);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    connect(gamecenter, SIGNAL(Finished()), this, SLOT(OnViewFinished()));
 }
 
 bool Record::Play_Record(QString filename)
@@ -35,9 +36,28 @@ bool Record::Play_Record(QString filename)
     // 开始播放录像
     gamecenter->clear();
     ip = 0;
-    timer->start();
+    Play_Before();
 
     return true;
+}
+
+void Record::Play_Before()
+{
+    boss = lines[0];
+    player = lines[1];
+    boss_pos = QPointF(500, 800);
+    ip = 2;
+    time = 0;
+    list1.clear();
+    list2.clear();
+
+    OnTimer();
+}
+
+void Record::Play()
+{
+    timer->start();
+    gamecenter->Continue();
 }
 
 void Record::OnTimer()
@@ -45,9 +65,20 @@ void Record::OnTimer()
     if (ip >= lines.size())
     {
         timer->stop();
+        gamecenter->Record_Over();
         return;
     }
-    bool flag = (ip == 0);
+    bool flag = (time == 0);
+
+    emit setTime(time);
+
+    if (!flag)
+    {
+        for (int i = 0; i < list1.size(); i++)
+            gamecenter->addBullet(list1[i], list2[i]);
+        list1.clear();
+        list2.clear();
+    }
 
     DealFrame();
     if (flag)
@@ -57,35 +88,67 @@ void Record::OnTimer()
     else
     {
         gamecenter->ElementMoveTo(1, player_pos, GAMESPEED);
-        gamecenter->ElementMoveTo(2, boss_pos, GAMESPEED);
     }
+    time++;
 }
 
 void Record::DealFrame()
 {
     QString tmp = lines[ip++];
     int n = tmp.toInt();
+
+    qDebug() << n;
+
+    tmp = lines[ip++];
+    int r, s;
+    sscanf(tmp.toStdString().c_str(), "%d%d", &r, &s);
+    emit setScore(s);
+
     QString boss = lines[ip++];
     QString player = lines[ip++];
 
-    float x,y,vx,vy;
-    // 读取boss坐标
-    tmp = lines[ip++];
-    sscanf(tmp.toStdString().c_str(), "%f%f", &x, &y);
+    emit setBossWord(boss);
+    emit setPlayerWord(player);
 
-    boss_pos.setX(x);
-    boss_pos.setY(y);
+    float x,y,vx,vy;
+
     // 读取player坐标
+    int flag;
     tmp = lines[ip++];
-    sscanf(tmp.toStdString().c_str(), "%f%f", &x, &y);
+    sscanf(tmp.toStdString().c_str(), "%f%f%d", &x, &y, &flag);
     player_pos.setX(x);
     player_pos.setY(y);
+
+    if (flag==1)
+        gamecenter->addPlaneBullet(player_pos ,boss_pos);
+    ip++;
+    ip++;
 
     // 创建所有子弹
     for (int i = 0; i < n; i++)
     {
         tmp = lines[ip++];
-        sscanf(tmp.toStdString().c_str(), "%f%f%f%f", &x, &y, &vx, &vy);
-        gamecenter->addBullet(QPointF(x,y), QPointF(vx, vy));
+        x = boss_pos.x(), y = boss_pos.y();
+        sscanf(tmp.toStdString().c_str(), "%f%f", &vx, &vy);
+        vx *= 10, vy *= 10;
+        list1.push_back(QPointF(x,y));
+        list2.push_back(QPointF(vx,vy));
     }
+}
+
+void Record::Pause()
+{
+    timer->stop();
+    gamecenter->Pause();
+}
+
+void Record::Continue()
+{
+    timer->start();
+    gamecenter->Continue();
+}
+
+void Record::OnViewFinished()
+{
+    emit recordOver();
 }

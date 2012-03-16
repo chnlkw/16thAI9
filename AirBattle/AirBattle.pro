@@ -6,23 +6,29 @@
 
 QT       += core gui
 QT       += opengl
+QT       += network
 
 TARGET = AirBattle
 TEMPLATE = app
-
 
 SOURCES += main.cpp\
         airbattle.cpp \
     View.cpp \
     GameCenter.cpp \
     Element.cpp \
-    Record.cpp
+    Record.cpp \
+    filecenter.cpp \
+    server.cpp \
+    network.cpp
 
 HEADERS  += airbattle.h \
     View.h \
     GameCenter.h \
     Element.h \
     const.h \
-    Record.h
+    Record.h \
+    filecenter.h \
+    server.h \
+    network.h
 
 FORMS    += airbattle.ui

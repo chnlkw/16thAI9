@@ -10,16 +10,17 @@ View::View(QWidget *parent)
 void View::GameInit()
 {
     nowtex = -1;
+    check = false;
     n = 0;
 
     // 定义时钟
     timer = new QTimer;
-    timer->setInterval(1000.0/FRAPS);
+    timer->setInterval(1000.0/FRAPS+0.01);
     timer->start();
     timer->connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
 
-void View::loadSingleTexture(QString file, GLuint &u)
+void View::loadSingleTexture(QString file, GLuint &u, double alpha)
 {
     QPixmap buf;
     QImage tex;
@@ -30,7 +31,20 @@ void View::loadSingleTexture(QString file, GLuint &u)
         buf.fromImage(dummy);
         qDebug() << "error!";
     }
-    tex = QGLWidget::convertToGLFormat(buf.toImage());
+    QImage tmp = buf.toImage();
+    if (alpha < 0.9999)
+    {
+        for (int i = 0; i < tmp.width(); i++)
+            for (int j = 0; j < tmp.height(); j++)
+            {
+                QColor color = tmp.pixel(i, j);
+                int r = qRed(tmp.pixel(QPoint(i,j))), b = qBlue(tmp.pixel(QPoint(i,j))), g = qGreen(tmp.pixel(QPoint(i,j))), a = qAlpha(tmp.pixel(QPoint(i,j)));
+                if (a == 0) continue;
+                color.setRgba(qRgba(r,g,b,a));
+                tmp.setPixel(i, j, color.rgba());
+            }
+    }
+    tex = QGLWidget::convertToGLFormat(tmp);
     glGenTextures(1, &u);
     glBindTexture(GL_TEXTURE_2D, u);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
@@ -41,10 +55,12 @@ void View::loadSingleTexture(QString file, GLuint &u)
 
 void View::loadGLTextures()
 {
-    loadSingleTexture("nothing.png", texture[0]);
-    loadSingleTexture("background.jpg", texture[1]);
-    loadSingleTexture("bullet.png", texture[2]);
-    loadSingleTexture("player.png", texture[3]);
+    loadSingleTexture("res/background.png", texture[0]);
+    loadSingleTexture("res/boss.png", texture[1]);
+    loadSingleTexture("res/bullet.png", texture[2], 0.5);
+    loadSingleTexture("res/player.png", texture[3]);
+    loadSingleTexture("res/frame.png", texture[4]);
+    loadSingleTexture("res/plane_bullet.png", texture[5]);
 }
 
 void View::initializeGL()
@@ -55,7 +71,7 @@ void View::initializeGL()
     glShadeModel(GL_SMOOTH);
     glClearColor(1,1,1,0);
     glClearDepth(1);
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
     glEnable(GL_POINT_SMOOTH);
@@ -68,6 +84,8 @@ void View::initializeGL()
     glHint(GL_LINE_SMOOTH, GL_NICEST);
 
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    glDisable(GL_DEPTH_TEST);
 
     //glEnableClientState( GL_VERTEX_ARRAY );
 
@@ -94,7 +112,7 @@ void View::DrawElement(Element *a)
     int u = a->tex;
 
     glPushMatrix();
-    glTranslated((GLdouble)pos.x(), (GLdouble)pos.y(), -10);
+    glTranslated((GLdouble)pos.x(), (GLdouble)pos.y(), -12.07);
     glRotated(a->A, 0, 0, 1);
 
     if (u != nowtex)
@@ -114,12 +132,15 @@ void View::DrawElement(Element *a)
     glPopMatrix();
 }
 
+
 void View::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
     // 画元素
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (int i = 0; i < n; i++)
         DrawElement(&ElementList[i]);
 }
@@ -131,16 +152,23 @@ void View::OnTimer()
         ElementList[i].go(1.0/FRAPS);
 
     // 清除出界元素
-    for (int i = 0; i < n; i++)
+    for (int i = 3; i < n; i++)
         if (!ElementList[i].visual())
             ElementList[i--] = ElementList[--n];
     update();
+
+    if (check && n == 3)
+    {
+        Pause();
+        check = false;
+        emit Finished();
+    }
 }
 
 QPointF View::ViewToOpenGL(QPointF tmp)
 {
-    tmp.setX((tmp.x() - WIDTH/2) / 100.0);
-    tmp.setY((tmp.y() - HEIGTH/2) / 100.0);
+    tmp.setX((tmp.x() - WIDTH1/2) / 100.0);
+    tmp.setY((tmp.y() - HEIGTH1/2) / 100.0);
     return tmp;
 }
 
@@ -149,4 +177,14 @@ QPointF View::SizeToOpenGL(QPointF tmp)
     tmp.setX(tmp.x() / 100.0);
     tmp.setY(tmp.y() / 100.0);
     return tmp;
+}
+
+void View::Pause()
+{
+    timer->stop();
+}
+
+void View::Continue()
+{
+    timer->start();
 }

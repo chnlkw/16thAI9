@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QPixmap>
 #include <qgl.h>
+#include <QRgb>
 
 class View : public QGLWidget
 {
@@ -19,7 +20,14 @@ public:
 
 public:
     Element ElementList[MAX_ELEMENT_NUM];
+    bool check;
     int n;
+
+    void Pause();
+    void Continue();
+
+signals:
+    void Finished();
 
 private:
     QTimer* timer;
@@ -41,7 +49,7 @@ protected:
 
     GLuint texture[10]; // Ã˘Õº
     int nowtex; // µ±«∞Œ∆¿Ì
-    void loadSingleTexture(QString file, GLuint &u);
+    void loadSingleTexture(QString file, GLuint &u, double alpha = 1);
     void loadGLTextures();
 };
 

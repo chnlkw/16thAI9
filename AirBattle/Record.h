@@ -17,13 +17,33 @@ public:
 
     void GameInit();
 
+    void Play_Before();
+    void Play();
+
+    void Pause();
+    void Continue();
+
+    QString boss, player;
+
+signals:
+    void setScore(int);
+    void setTime(int);
+    void setBossWord(QString);
+    void setPlayerWord(QString);
+    void recordOver();
+
 private slots:
     void OnTimer();
+    void OnViewFinished();
 
 private:
     QStringList lines;
     QTimer *timer;
     int ip; // 指向当前待读行
+    int time; // 第几回合
+    bool pause;
+
+    QVector<QPointF> list1, list2;
 
     void DealFrame();
 

@@ -12,11 +12,15 @@ public:
     QPointF size; // size.x宽度，size.y高度
     float A; // 旋转角度
 
+    QPointF Start;
     QPointF Goal; // 目标位置
+    QPointF Control;
+    double t;
 
     QPointF v; // 速度
     bool speed; // 是否有移动速度
-    bool moveto; // 是否是移动到
+    int moveto; // 是否是移动到
+
 
     int tex; // 贴图
 
