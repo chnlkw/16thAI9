@@ -182,6 +182,8 @@ QPointF View::SizeToOpenGL(QPointF tmp)
 void View::Pause()
 {
     timer->stop();
+    check = false;
+    emit Finished();
 }
 
 void View::Continue()

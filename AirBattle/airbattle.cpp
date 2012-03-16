@@ -419,8 +419,12 @@ void AirBattle::on_viewstart_clicked()
 
 void AirBattle::Record_Over()
 {
-    state = 6;
-    ui->viewstart->setText(tr("ÖØ²¥"));
+//    state = 6;
+//    ui->viewstart->setText(tr("ÖØ²¥"));
+
+    MyTimer::msleep(2000);
+    state = 1;
+    Door_Close();
 }
 
 void AirBattle::on_viewback_clicked()

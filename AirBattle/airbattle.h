@@ -15,6 +15,14 @@ namespace Ui {
     class AirBattle;
 }
 
+class MyTimer : public QThread
+{
+    Q_OBJECT
+public:
+    explicit MyTimer(QObject *parent = 0) : QThread(parent) {}
+    static void msleep(unsigned long secs) { QThread::msleep(secs); }
+};
+
 class AirBattle : public QMainWindow
 {
     Q_OBJECT

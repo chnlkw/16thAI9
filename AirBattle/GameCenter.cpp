@@ -12,7 +12,7 @@ GameCenter::GameCenter(View *view)
 
 void GameCenter::GameInit()
 {
-    view->setGeometry(55, 27, width, height);
+    view->setGeometry(31, 25, width, height);
     connect(view, SIGNAL(Finished()), this, SLOT(RecvFinished()));
 
     clear();
@@ -32,7 +32,7 @@ void GameCenter::addBullet(QPointF pos, QPointF v)
 void GameCenter::addPlaneBullet(QPointF pos, QPointF goal)
 {
     Element &bullet = view->ElementList[view->n++];
-    bullet.SetInit(QPointF(pos), QPointF(20, 35));
+    bullet.SetInit(QPointF(pos), QPointF(PLANE_BULLET_WIDTH, PLANE_BULLET_HEIGHT));
     bullet.A = 0;
     bullet.SetTex(5);
 
@@ -98,6 +98,7 @@ void GameCenter::Record_Over()
 {
     view->check = true;
     view->Pause();
+    //emit Finished();
 }
 
 void GameCenter::RecvFinished()
