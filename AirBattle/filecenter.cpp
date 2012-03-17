@@ -8,7 +8,7 @@ FileCenter::FileCenter()
 
 QStringList FileCenter::AI_List()
 {
-    QDirIterator a("AI");
+    QDirIterator a("ai");
 
     QStringList ans;
     while (a.hasNext())
@@ -29,7 +29,7 @@ QStringList FileCenter::AI_List()
 
 QStringList FileCenter::Record_List()
 {
-    QDirIterator a("Record");
+    QDirIterator a("replay");
 
     QStringList ans;
     while (a.hasNext())

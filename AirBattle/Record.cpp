@@ -48,8 +48,6 @@ void Record::Play_Before()
     boss_pos = QPointF(500, 800);
     ip = 2;
     time = 0;
-    list1.clear();
-    list2.clear();
 
     OnTimer();
 }
@@ -72,15 +70,7 @@ void Record::OnTimer()
 
     emit setTime(time);
 
-    if (!flag)
-    {
-        for (int i = 0; i < list1.size(); i++)
-            gamecenter->addBullet(list1[i], list2[i]);
-        list1.clear();
-        list2.clear();
-    }
-
-    DealFrame();
+    DealFrame(flag);
     if (flag)
     {
         gamecenter->init(player_pos, boss_pos);
@@ -90,9 +80,15 @@ void Record::OnTimer()
         gamecenter->ElementMoveTo(1, player_pos, GAMESPEED);
     }
     time++;
+    if (ip + 4 > lines.size())
+    {
+        timer->stop();
+        gamecenter->Record_Over();
+        return;
+    }
 }
 
-void Record::DealFrame()
+void Record::DealFrame(bool tag)
 {
     QString tmp = lines[ip++];
     int n = tmp.toInt();
@@ -131,8 +127,15 @@ void Record::DealFrame()
         x = boss_pos.x(), y = boss_pos.y();
         sscanf(tmp.toStdString().c_str(), "%f%f", &vx, &vy);
         vx *= 10, vy *= 10;
-        list1.push_back(QPointF(x,y));
-        list2.push_back(QPointF(vx,vy));
+        gamecenter->addBullet(QPointF(x, y), QPointF(vx, vy));
+    }
+
+    if (!tag && ip+4 < lines.size())
+    {
+        tmp = lines[ip+4];
+        sscanf(tmp.toStdString().c_str(), "%f%f%d", &x, &y, &flag);
+        player_pos.setX(x);
+        player_pos.setY(y);
     }
 }
 

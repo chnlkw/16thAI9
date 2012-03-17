@@ -43,9 +43,7 @@ private:
     int time; // 第几回合
     bool pause;
 
-    QVector<QPointF> list1, list2;
-
-    void DealFrame();
+    void DealFrame(bool tag = false);
 
     QPointF player_pos, boss_pos;
 };

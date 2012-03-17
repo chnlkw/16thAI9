@@ -333,23 +333,6 @@
       <string>1</string>
      </property>
     </widget>
-    <zorder>l1_4</zorder>
-    <zorder>l1</zorder>
-    <zorder>boss_word</zorder>
-    <zorder>timem</zorder>
-    <zorder>l1_2</zorder>
-    <zorder>player_word</zorder>
-    <zorder>l1_3</zorder>
-    <zorder>player_name</zorder>
-    <zorder>score</zorder>
-    <zorder>boss_name</zorder>
-    <zorder>viewstart</zorder>
-    <zorder>viewback</zorder>
-    <zorder>menu</zorder>
-    <zorder>SButton</zorder>
-    <zorder>times</zorder>
-    <zorder>timed</zorder>
-    <zorder>frame2</zorder>
    </widget>
    <widget class="QFrame" name="frame2">
     <property name="geometry">
@@ -377,12 +360,14 @@
      </property>
      <property name="font">
       <font>
-       <family>微软雅黑</family>
+       <family>Arial Black</family>
        <pointsize>18</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>开始游戏</string>
+      <string>Fight!</string>
      </property>
     </widget>
     <widget class="QListWidget" name="list">
@@ -396,6 +381,7 @@
      </property>
      <property name="font">
       <font>
+       <family>Arial</family>
        <pointsize>18</pointsize>
       </font>
      </property>
@@ -414,12 +400,14 @@
      </property>
      <property name="font">
       <font>
-       <family>微软雅黑</family>
+       <family>Arial Black</family>
        <pointsize>18</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>录像列表</string>
+      <string>Rep list</string>
      </property>
     </widget>
     <widget class="QLabel" name="State_Label">
@@ -433,8 +421,8 @@
      </property>
      <property name="font">
       <font>
-       <family>微软雅黑</family>
-       <pointsize>20</pointsize>
+       <family>Arial</family>
+       <pointsize>18</pointsize>
       </font>
      </property>
      <property name="text">
@@ -455,12 +443,14 @@
      </property>
      <property name="font">
       <font>
-       <family>微软雅黑</family>
+       <family>Arial Black</family>
        <pointsize>18</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>AI列表</string>
+      <string>AI list</string>
      </property>
     </widget>
    </widget>

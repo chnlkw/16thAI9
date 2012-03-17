@@ -1,0 +1,95 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{graphicx,float,wrapfig,subfig}
+\usepackage{algorithmic}
+\usepackage{xeCJK}
+\usepackage{fontspec}
+\usepackage{enumerate}
+\usepackage{setspace}
+\usepackage{indentfirst}
+
+% Chinese support
+\setCJKmainfont[BoldFont={Adobe Heiti Std}, ItalicFont={Adobe Kaiti Std}]{Adobe Song Std}
+\setCJKsansfont{WenQuanYi Zen Hei}
+\setCJKmonofont{Adobe Fangsong Std}
+\punctstyle{quanjiao}
+
+% Spacing and margins
+\onehalfspacing
+\allowdisplaybreaks
+\parindent=2em
+\parskip=1ex
+\addtolength{\hoffset}{-2em}
+\addtolength{\voffset}{-10ex}
+\addtolength{\textwidth}{4em}
+\addtolength{\textheight}{5ex}
+
+
+\begin{document}
+
+% Make title
+\title{\textbf{第16届智能体大赛AI开发手册}}
+\author{\texttt{清华大学计算机系科协}}
+\date{\today}
+\maketitle
+\thispagestyle{empty}
+
+% Homework begin from here
+\section{快速上手}
+\begin{enumerate}[(a)]
+\item 将/ai/sampleAI文件夹复制一份，改成自己喜欢的名字，比如/ai/bestAI。
+\item 运行/ai/bestAI/compile.bat。
+\item 运行/run.bat，即可享受对战的快感。
+\end{enumerate}
+
+\section{基础说明}
+\begin{enumerate}[(a)]
+\item /ai/myAI是一个空的AI框架，/ai/sampleAI是填充好的一个简单AI。里面有详尽的注释，读一读代码即可搞清楚如何编写AI。
+\item 运行gui以后，选择AI对战的方法是：按下鼠标选择Boss的AI，移动鼠标到Plane的AI处后松开。
+\item 对战开始以后会弹出3个黑框，其中platform.exe会不停输出两个数字，即回合数和积分。如果没有出现，则关闭所有窗口重新开启即可。
+\item 观看录像时，因为gui无法精确模拟连续时间的游戏情况，所以会导致内核判定子弹击中Plane，但是显示出来有几像素的偏差这种问题。以内核判定为准。
+\end{enumerate}
+
+\textbf{以上就是写一个AI所需要了解的所有基本情况。下面将会介绍一些游戏内核相关的内容，第一次阅读本文档可以忽略。}
+
+\section{深入理解}
+\subsection{游戏即时性的实现方式}
+游戏采取socket通信的形式，一个server负责处理游戏逻辑，两个client分别作为Boss和Plane。在游戏正常进行到第i回合时，server端做的事情如下：
+\begin{enumerate}[(a)]
+\item 将第i回合开始时的游戏局面信息传递给client。
+\item 等待0.1s。
+\item 处理client新发送过来的动作，动作的起始时间要大于等于i。
+\item 判断i到i+1回合内Plane有没有被击中。
+\item 更新i+1回合的游戏信息。
+\item 生成第i回合的录像信息。
+\end{enumerate}
+
+在client端，有一个线程来接收server发送过来的游戏信息，整个client端可以用伪代码来表示其运行情况：
+\begin{algorithmic}
+\WHILE{游戏没有结束}
+	\IF{没有收到新的游戏信息}
+		\STATE continue
+	\ELSE
+		\STATE 调用ai的dll获得玩家指定的动作
+		\STATE 发送动作到server
+	\ENDIF
+\ENDWHILE
+\end{algorithmic}
+
+因此，client端可以计算任意长的时间，只要保证动作发送到server时，游戏的回合数小于等于动作的起始时间即可。
+
+\subsection{Plane被子弹击中的判定方法}
+Plane是一个点，子弹是一个圆。在任意时刻，只要Plane和子弹中心的距离小于等于子弹半径即被判定为击中。这里需要用到一些初、高中数学方面的知识。
+
+假设某一时刻，某子弹位置是$(x_b,y_b)$，速度为$(u_x,u_y)$，半径为$r$；飞机位置是$(x_p,y_p)$，速度为$(v_x,v_y)$。那么经过$t\times 0.1s$后子弹位于$(x_b+u_xt,y_b+u_yt)$，飞机位于$(x_p+v_xt,y_p+v_yt)$。
+二者Euclid距离与子弹半径的平方差$$d(t)=(x_b+u_xt-x_p-v_xt)^2+(y_b+u_yt-y_p-v_yt)^2-r^2=At^2+Bt+C$$
+其中
+\begin{align*}
+A&=(u_x-v_x)^2+(u_y-v_y)^2\\
+B&=2\left[(u_x-v_x)(x_b-x_p)+(u_y-v_y)(y_b-y_p)\right]\\
+C&=(x_b-x_p)^2+(y_b-y_p)^2-r^2
+\end{align*}
+因此，二者在接下来的0.1s内会相撞的充要条件是$$\exists t \in [0,1],~s.t.~d(t) \leq 0$$
+所以我们只要求出$d(t)$在$[0,1]$的最小值，判断其是否小于等于0即可。
+\end{document}

@@ -4,7 +4,7 @@
 #include <QTime>
 #include <QFile>
 
-const char TextCodec[] = "GBK";
+const char TextCodec[] = "UTF-8";
 
 AirBattle::AirBattle(QWidget *parent) :
     QMainWindow(parent),
@@ -150,7 +150,7 @@ void AirBattle::on_record_clicked()
 {
     state = 1;
     p1 = p2 = "";
-    ui->start->setText(tr("观看回放"));
+    ui->start->setText(tr("Replay!"));
 
     QStringList ans = filecenter->Record_List();
     ui->list->clear();
@@ -167,7 +167,7 @@ void AirBattle::on_AI_clicked()
 {
     state = 0;
     rec = "";
-    ui->start->setText(tr("开始游戏"));
+    ui->start->setText(tr("Fight!"));
 
     QStringList ans = filecenter->AI_List();
     ui->list->clear();
@@ -185,8 +185,8 @@ void AirBattle::on_start_clicked()
     if (state == 0)
     {
         if (p1 == "" || p2 == "") return;
-        QString Boss = "AI/" + p1 + "/aiBoss.dll";
-        QString Player = "AI/" + p2 + "/aiPlane.dll";
+        QString Boss = "ai/" + p1 + "/aiBoss.dll";
+        QString Player = "ai/" + p2 + "/aiPlane.dll";
         QString gb = "bin/aiBoss.dll";
         QString gp = "bin/aiPlane.dll";
 
@@ -206,7 +206,7 @@ void AirBattle::on_start_clicked()
     {
         if (rec == "") return;
 
-        ui->viewstart->setText(tr("播放"));
+        ui->viewstart->setText(tr("Play"));
         state = 4;
         playrecord(rec);
         Door_Close();
@@ -215,7 +215,7 @@ void AirBattle::on_start_clicked()
 
 void AirBattle::playrecord(QString file)
 {
-    file = "Record/" + file + ".txt";
+    file = "replay/" + file + ".txt";
     setBossName(record->boss);
     setPlayerName(record->player);
     record->Play_Record(file);
@@ -229,13 +229,13 @@ void AirBattle::setState(QString x)
 void AirBattle::setVS(QString a, QString b)
 {
     p1 = a, p2 = b;
-    setState(a + " VS " + b);
+    setState(a + " vs " + b);
 }
 
 void AirBattle::setRecord(QString a)
 {
     rec = a;
-    setState("Record: " + a);
+    setState(a);
 }
 
 void AirBattle::on_list_pressed(const QModelIndex &index)
@@ -328,6 +328,7 @@ void AirBattle::Door_Close_End()
     {
         swaptoframe2();
         Door_Open();
+        state = 0;
         return;
     }
 
@@ -335,7 +336,7 @@ void AirBattle::Door_Close_End()
     {
         QString boss      = "start bin/userAI_Boss.exe bin/aiBoss.dll";
         QString player    = "start bin/userAI_Plane.exe bin/aiPlane.dll";
-        QString plateform = "start bin/platform.exe 1 record.txt 3000 100";
+        QString plateform = "start bin/platform.exe 1 replay.txt 3000 100";
 
         system(plateform.toStdString().c_str());
         system(boss.toStdString().c_str());
@@ -385,7 +386,7 @@ void AirBattle::on_viewstart_clicked()
 
     if (state == 4)
     {
-        ui->viewstart->setText(tr("暂停"));
+        ui->viewstart->setText(tr("Pause"));
         record->Play();
         state = 5;
         return;
@@ -394,7 +395,7 @@ void AirBattle::on_viewstart_clicked()
     if (state == 5)
     {
         record->Pause();
-        ui->viewstart->setText(tr("继续"));
+        ui->viewstart->setText(tr("Resume"));
         state = 7;
         return;
     }
@@ -402,7 +403,7 @@ void AirBattle::on_viewstart_clicked()
     if (state == 6)
     {
         playrecord(rec);
-        ui->viewstart->setText(tr("暂停"));
+        ui->viewstart->setText(tr("Pause"));
         record->Play();
         state = 5;
         return;
@@ -411,7 +412,7 @@ void AirBattle::on_viewstart_clicked()
     if (state == 7)
     {
         record->Continue();
-        ui->viewstart->setText(tr("暂停"));
+        ui->viewstart->setText(tr("Pause"));
         state = 5;
         return;
     }
@@ -420,7 +421,7 @@ void AirBattle::on_viewstart_clicked()
 void AirBattle::Record_Over()
 {
 //    state = 6;
-//    ui->viewstart->setText(tr("重播"));
+//    ui->viewstart->setText(tr("Again"));
 
     MyTimer::msleep(2000);
     state = 1;
@@ -446,14 +447,15 @@ void AirBattle::recv_server(int round, int score)
         int d = QDate::currentDate().day();
         int h = QTime::currentTime().hour();
         int mm = QTime::currentTime().minute();
+        int s = QTime::currentTime().second();
         QString ans;
-        ans =  QString::number(m) + "月" + QString::number(d) + "日  " + QString::number(h) + "时" + QString::number(mm) + "分";
-        QFile::copy("record.txt", "record/" + ans + ".txt");
-        QFile::remove("record.txt");
+        ans =  QString::number(m) + "-" + QString::number(d) + " " + QString::number(h) + "-" + QString::number(mm) + "-" + QString::number(s) + " " + p1 + " vs " + p2;
+        QFile::copy("replay.txt", "replay/" + ans + ".txt");
+        QFile::remove("replay.txt");
         //SButton_Drop();
         rec = ans;
 
-        ui->viewstart->setText(tr("播放"));
+        ui->viewstart->setText(tr("Play"));
         state = 4;
         playrecord(rec);
 
@@ -486,7 +488,7 @@ void AirBattle::on_SButton_Removed()
 {
     ui->SButton->hide();
 
-    ui->viewstart->setText(tr("播放"));
+    ui->viewstart->setText(tr("Play"));
     state = 4;
     playrecord(rec);
 
