@@ -328,7 +328,7 @@ void AirBattle::Door_Close_End()
     {
         swaptoframe2();
         Door_Open();
-        state = 0;
+        on_AI_clicked();
         return;
     }
 
