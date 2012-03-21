@@ -1,4 +1,5 @@
 #include <View.h>
+#include <QDebug>
 
 View::View(QWidget *parent)
 {
@@ -15,7 +16,7 @@ void View::GameInit()
 
     // 定义时钟
     timer = new QTimer;
-    timer->setInterval(1000.0/FRAPS+0.01);
+    timer->setInterval(20);
     timer->start();
     timer->connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
@@ -145,11 +146,19 @@ void View::paintGL()
         DrawElement(&ElementList[i]);
 }
 
+bool View::check1(){
+    qDebug() << "-------------------------------------------------------";
+    for (int i = 0; i < n; i++)
+        qDebug() << "(" << ElementList[i].v.x() << "," << ElementList[i].v.y() << ")";
+    return false;
+}
+
 void View::OnTimer()
 {
+    check1();
     // 移动
     for (int i = 0; i < n; i++)
-        ElementList[i].go(1.0/FRAPS);
+        ElementList[i].go(1.0/50);
 
     // 清除出界元素
     for (int i = 3; i < n; i++)

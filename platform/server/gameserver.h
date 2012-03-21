@@ -15,9 +15,9 @@ private:
     void shakeHands();
     void send();
     void recv();
-    void judge(const GameInfo& cntGameInfo, const vector<int>& newBulletsId);
-    void genRep(const GameInfo& cntGameInfo, const vector<int>& newBulletsId);
-    void updateGameInfo(vector<int>& newBulletsId);
+    void judge(const GameInfo& cntGameInfo, const vector<NewBullet>& validNewBullets);
+    void genRep(const GameInfo& cntGameInfo, const vector<NewBullet>& validNewBullets);
+    void updateGameInfo(vector<NewBullet>& validNewBullets);
     int getBulletType(double vx, double vy);
     bool isValidNewBullet(const NewBullet& bullet);
     bool isValidMove(const Move& move);
@@ -39,7 +39,9 @@ private:
     int cntRecvNewBulletsNum, cntRecvMovesNum, cntRecvSkillsNum;
     QTcpSocket* bossSendSocket, *planeSendSocket, *guiSendSocket;
 
-    vector<NewBullet> recvNewBullets, newBullets;
+    vector<NewBullet> newBullets[3001][5];
+
+    vector<NewBullet> recvNewBullets;
     vector<Move> recvMoves, moves;
     vector<Skill> recvSkills, skills;
     QString recvBossMsg, recvPlaneMsg;

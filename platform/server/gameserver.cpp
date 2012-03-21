@@ -43,10 +43,10 @@ void GameServer::run() {
         Timer::msleep(sleepTime);  // wait
         recv(); // recv the info of round >= i
         GameInfo cntGameInfo = gameInfo;
-        vector<int> newBulletsId;
-        updateGameInfo(newBulletsId);  // calc the info of round i+1
-        judge(cntGameInfo, newBulletsId);   // judge if hit in [i, i + 1)
-        genRep(cntGameInfo, newBulletsId);  // gen the rep of round i
+        vector<NewBullet> validNewBullets;
+        updateGameInfo(validNewBullets);  // calc the info of round i+1
+        judge(cntGameInfo, validNewBullets);   // judge if hit in [i, i + 1)
+        genRep(cntGameInfo, validNewBullets);  // gen the rep of round i's starting
     }
     if (gameInfo.round == totRounds + 1) send();
 
@@ -63,20 +63,28 @@ void GameServer::run() {
 
 void GameServer::shakeHands() {
     for (int i = 0; i < 4 + gui; i ++) {
-        this->waitForNewConnection(-1);
+        //cout << i << endl;
+        while (!this->waitForNewConnection(5000)) cout << "waiting connection" << endl;
         QTcpSocket* socket = this->nextPendingConnection();
+
+        //cout << "new connection: " << socket->socketDescriptor() << endl;
+
         sendString(socket, QString("accepted"));
+
+        //cout << "send accepted" << endl;
 
         QString sr;
         recvString(socket, sr);
 
-        //cout << sr.toStdString() << endl;
+        //cout << "recv " << sr.toStdString() << endl;
 
         //players[clientType].socketDescriptor = socket->socketDescriptor();
         if (sr == "client sender") {
             int clientType;
             recvInt(socket, clientType);
+            //cout << "recv " << clientType << endl;
             recvString(socket, players[clientType].name);
+            //cout << "recv " << players[clientType].name.toStdString() << endl;
             if ((CLIENT_TYPE)clientType == BOSS) {
                 bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, &recvBossMsg, this);
                 connect(bossRecvThread, SIGNAL(finished()), bossRecvThread, SLOT(deleteLater()));
@@ -91,6 +99,7 @@ void GameServer::shakeHands() {
         } else if (sr == "client recver") {
             int clientType;
             recvInt(socket, clientType);
+            //cout << "recv " << clientType << endl;
             if ((CLIENT_TYPE)clientType == BOSS) {
                 bossSendSocket = new QTcpSocket();
                 bossSendSocket->setSocketDescriptor(socket->socketDescriptor());
@@ -108,7 +117,7 @@ void GameServer::shakeHands() {
     }
 }
 
-void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBulletsId) {
+void GameServer::judge(const GameInfo& cntGameInfo, const vector<NewBullet>& validNewBullets) {
     if (useBomb) return;
 
     double xp = cntGameInfo.planeX, yp = cntGameInfo.planeY;
@@ -137,8 +146,8 @@ void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBullet
     }
 
     if (!hit) {
-        for (int i = 0; i < newBulletsId.size(); i ++) {
-            NewBullet& bullet = newBullets[i];
+        for (int i = 0; i < validNewBullets.size(); i ++) {
+            const NewBullet& bullet = validNewBullets[i];
             double xb = BULLET_X, yb = BULLET_Y;
             double vx = bullet.vx, vy = bullet.vy;
             double a = SQR(vx - dx) + SQR(vy - dy);
@@ -160,7 +169,7 @@ void GameServer::judge(const GameInfo& cntGameInfo, const vector<int>& newBullet
     else if (gameInfo.round == totRounds) gameInfo.gameStatus = PLANE_WIN;
 }
 
-void GameServer::updateGameInfo(vector<int>& newBulletsId) {
+void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
     // Use skills
     useBomb = false;
     for (int i = 0; i < skills.size(); i ++) {
@@ -221,28 +230,43 @@ void GameServer::updateGameInfo(vector<int>& newBulletsId) {
         int cntBulletsNum[5], limitBulletsNum[5];
         memset(cntBulletsNum, 0, sizeof(cntBulletsNum));
         for (int i = 0; i < 5; i ++)
-            limitBulletsNum[i] = (int)(BULLET_INIT_LIMIT[i] * BULLET_INCREASE(gameInfo.round + 1));
-        for (int i = 0; i < newBullets.size(); i ++) {
-            const NewBullet& nb = newBullets[i];
-            if (nb.initTime > gameInfo.round + 1 ||
-                    (gameInfo.round + 1 - nb.initTime) * BULLET_V[0] > sqrt(WIDTH*WIDTH + HEIGHT*HEIGHT)) continue;
-            int type = getBulletType(nb.vx, nb.vy);
-            if (cntBulletsNum[type] >= limitBulletsNum[type]) continue;
+            limitBulletsNum[i] = (int)(BULLET_INIT_LIMIT[i] * BULLET_INCREASE(gameInfo.round));
 
-            if (nb.initTime == gameInfo.round)
-                newBulletsId.push_back(i);
-
-            double x = BULLET_X, y = BULLET_Y;
-            x += nb.vx * (gameInfo.round + 1 - nb.initTime);
-            y += nb.vy * (gameInfo.round + 1 - nb.initTime);
+        for (int i = 0; i < gameInfo.bullets.size(); i ++) {
+            int type = getBulletType(gameInfo.bullets[i].vx, gameInfo.bullets[i].vy);
+            double x = gameInfo.bullets[i].x;
+            double y = gameInfo.bullets[i].y;
+            x += gameInfo.bullets[i].vx;
+            y += gameInfo.bullets[i].vy;
             if (0 <= x && x <= WIDTH && 0 <= y && y <= HEIGHT) {
                 cntBulletsNum[type] ++;
                 Bullet bullet;
                 bullet.x = x;
                 bullet.y = y;
-                bullet.vx = nb.vx;
-                bullet.vy = nb.vy;
+                bullet.vx = gameInfo.bullets[i].vx;
+                bullet.vy = gameInfo.bullets[i].vy;
                 bullets.push_back(bullet);
+            }
+        }
+
+        for (int j = 0; j < 5; j ++) {
+            for (int i = 0; i < newBullets[gameInfo.round][j].size(); i ++) {
+                if (cntBulletsNum[j] >= limitBulletsNum[j]) break;
+                NewBullet& newBullet = newBullets[gameInfo.round][j][i];
+                int type = getBulletType(newBullet.vx, newBullet.vy);
+                double x = BULLET_X, y = BULLET_Y;
+                x += newBullet.vx;
+                y += newBullet.vy;
+                if (0 <= x && x <= WIDTH && 0 <= y && y <= HEIGHT) {
+                    validNewBullets.push_back(newBullet);
+                    cntBulletsNum[type] ++;
+                    Bullet bullet;
+                    bullet.x = x;
+                    bullet.y = y;
+                    bullet.vx = newBullet.vx;
+                    bullet.vy = newBullet.vy;
+                    bullets.push_back(bullet);
+                }
             }
         }
     }
@@ -250,8 +274,8 @@ void GameServer::updateGameInfo(vector<int>& newBulletsId) {
 }
 
 
-void GameServer::genRep(const GameInfo& cntGameInfo, const vector<int>& newBulletsId) {
-    fprintf(repFile, "%d\n", newBulletsId.size());
+void GameServer::genRep(const GameInfo& cntGameInfo, const vector<NewBullet>& validNewBullets) {
+    fprintf(repFile, "%d\n", validNewBullets.size());
     fprintf(repFile, "%d %d\n", cntGameInfo.round, cntGameInfo.score);
     fprintf(repFile, "%s\n", recvBossMsg.toStdString().c_str());
     fprintf(repFile, "%s\n", recvPlaneMsg.toStdString().c_str());
@@ -259,10 +283,8 @@ void GameServer::genRep(const GameInfo& cntGameInfo, const vector<int>& newBulle
     fprintf(repFile, "%d %d\n", cntGameInfo.planeSkillsNum[0], cntGameInfo.planeSkillsNum[1]);
     int useSpeedup = (lastSpeedup == gameInfo.round);
     fprintf(repFile, "%d %d\n", useSpeedup, useBomb);
-    for (int i = 0; i < newBulletsId.size(); i ++) {
-        int t = newBulletsId[i];
-        fprintf(repFile, "%lf %lf\n", newBullets[t].vx, newBullets[t].vy);
-    }
+    for (int i = 0; i < validNewBullets.size(); i ++)
+        fprintf(repFile, "%lf %lf\n", validNewBullets[i].vx, validNewBullets[i].vy);
     fprintf(repFile, "\n");
 }
 
@@ -284,7 +306,7 @@ void GameServer::recv() {
     int size = recvNewBullets.size();
     for (int i = cntRecvNewBulletsNum; i < size; i ++)
         if (isValidNewBullet(recvNewBullets[i]))
-            newBullets.push_back(recvNewBullets[i]);
+            newBullets[recvNewBullets[i].initTime][getBulletType(recvNewBullets[i].vx, recvNewBullets[i].vy)].push_back(recvNewBullets[i]);
     cntRecvNewBulletsNum = size;
 
     // moves
@@ -318,7 +340,7 @@ int GameServer::getBulletType(double vx, double vy) {
 
 
 bool GameServer::isValidNewBullet(const NewBullet &bullet) {
-    if (bullet.initTime < gameInfo.round) return false;
+    if (bullet.initTime < gameInfo.round || bullet.initTime > totRounds) return false;
     //if (bullet.vy > 0) return false;
     if (getBulletType(bullet.vx, bullet.vy) == -1) return false;
     return true;

@@ -12,7 +12,7 @@ Record::Record(GameCenter *game)
 void Record::GameInit()
 {
     timer = new QTimer;
-    timer->setInterval(1000*GAMESPEED+0.01);
+    timer->setInterval(200);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(gamecenter, SIGNAL(Finished()), this, SLOT(OnViewFinished()));
 }
@@ -77,7 +77,7 @@ void Record::OnTimer()
     }
     else
     {
-        gamecenter->ElementMoveTo(1, player_pos, GAMESPEED);
+        gamecenter->ElementMoveTo(1, player_pos, 0.1*2);
     }
     time++;
     if (ip + 4 > lines.size())

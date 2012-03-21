@@ -56,15 +56,18 @@ void GameClient::shakeHands() {
 
     QString s;
     recvString(sendSocket, s);
+    //cout << "recv " << s.toStdString() << endl;
     assert(s == "accepted");
     sendString(sendSocket, "client sender");
     sendInt(sendSocket, (int)clientType);
     sendString(sendSocket, aiName);
     recvString(sendSocket, s);
+    //cout << "recv " << s.toStdString() << endl;
     assert(s == "shake hand over");
 
-    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo, &recvOverFlag);
+    Timer::msleep(500);
 
+    recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo, &recvOverFlag);
     recvThread->start();
 }
 

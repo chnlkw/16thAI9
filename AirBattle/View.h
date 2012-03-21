@@ -51,6 +51,8 @@ protected:
     int nowtex; // µ±«∞Œ∆¿Ì
     void loadSingleTexture(QString file, GLuint &u, double alpha = 1);
     void loadGLTextures();
+
+    bool check1();
 };
 
 #endif // VIEW_H

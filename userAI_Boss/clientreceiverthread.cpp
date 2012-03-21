@@ -32,15 +32,19 @@ void ClientReceiverThread::run() {
 }
 
 void ClientReceiverThread::shakeHands() {
+    //cout << "thread create" << endl;
     recvSocket = new QTcpSocket();
     recvSocket->connectToHost(serverAddr, serverPort);
-    recvSocket->waitForConnected();
+    while (!recvSocket->waitForConnected(1000)) cout << "connect failed" << endl;
 
+    //cout << "thread connect: " << recvSocket->state() << endl;
     QString s;
     recvString(recvSocket, s);
+    //cout << "thread recv " << s.toStdString() << endl;
     assert(s == "accepted");
     sendString(recvSocket, "client recver");
     sendInt(recvSocket, (int)clientType);
     recvString(recvSocket, s);
+    //cout << "thread recv " << s.toStdString() << endl;
     assert(s == "shake hand over");
 }

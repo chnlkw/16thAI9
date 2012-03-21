@@ -2,9 +2,13 @@
 #define COMMON_H
 
 #include "const.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <cmath>
 #include <iostream>
 #include <vector>
-
 using namespace std;
 
 struct NewBullet {
