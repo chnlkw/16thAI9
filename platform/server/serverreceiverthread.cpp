@@ -1,16 +1,17 @@
 #include "serverreceiverthread.h"
 
-ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QString* msg, QObject *parent) :
+ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QString* msg, volatile int* bossRecvFinish, QObject *parent) :
     QThread(parent)
 {
     socket = new QTcpSocket(this);
     socket->setSocketDescriptor(socketDescriptor);
     this->newBullets = newBullets;
     this->msg = msg;
+    this->recvFinish = bossRecvFinish;
     clientType = BOSS;
 }
 
-ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<Move>* moves, vector<Skill>* skills, QString* msg, QObject *parent) :
+ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<Move>* moves, vector<Skill>* skills, QString* msg, volatile int* planeRecvFinish, QObject *parent) :
     QThread(parent)
 {
     socket = new QTcpSocket(this);
@@ -18,6 +19,7 @@ ServerReceiverThread::ServerReceiverThread(int socketDescriptor, vector<Move>* m
     this->moves = moves;
     this->skills = skills;
     this->msg = msg;
+    this->recvFinish = planeRecvFinish;
     clientType = PLANE;
 }
 
@@ -33,6 +35,7 @@ void ServerReceiverThread::run() {
             recvMoves(socket, *moves);
             recvSkills(socket, *skills);
         }
+        (*recvFinish) ++;
     }
 }
 

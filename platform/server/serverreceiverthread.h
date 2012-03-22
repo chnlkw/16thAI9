@@ -10,8 +10,8 @@ class ServerReceiverThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QString* msg, QObject *parent = 0);
-    explicit ServerReceiverThread(int socketDescriptor, vector<Move>* moves, vector<Skill>* skills, QString* msg, QObject *parent = 0);
+    explicit ServerReceiverThread(int socketDescriptor, vector<NewBullet>* newBullets, QString* msg, volatile int* bossRecvFinish, QObject *parent = 0);
+    explicit ServerReceiverThread(int socketDescriptor, vector<Move>* moves, vector<Skill>* skills, QString* msg, volatile int* planeRecvFinish, QObject *parent = 0);
     void run();
 
 signals:
@@ -25,7 +25,7 @@ private:
     vector<Move>* moves;
     vector<Skill>* skills;
     QString* msg;
-
+    volatile int* recvFinish;
 };
 
 #endif // RECEIVERTHREAD_H

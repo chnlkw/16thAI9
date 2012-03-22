@@ -7,6 +7,8 @@ GameServer::GameServer(int gui, char* repFileName, int totRounds, int sleepTime)
     gameInfo.planeY = PLANE_INIT_Y;
     memset(gameInfo.planeSkillsNum, 0, sizeof(gameInfo.planeSkillsNum));
     cntRecvNewBulletsNum = cntRecvMovesNum = cntRecvSkillsNum = 0;
+    bossRecvFinish = planeRecvFinish = 0;
+    prevBossRecv = prevPlaneRecv = 0;
     lastSpeedup = -10000;
     this->gui = gui;
     this->repFileName = repFileName;
@@ -40,7 +42,13 @@ void GameServer::run() {
         printf("%d %d\n", gameInfo.round, gameInfo.score);
         send(); // send the info of round i
         if (gameInfo.gameStatus != BATTLE) break;
-        Timer::msleep(sleepTime);  // wait
+        for (int i = 0; i < 10; i ++) {
+            Timer::msleep(sleepTime / 10);
+            if (bossRecvFinish > prevBossRecv && planeRecvFinish > prevPlaneRecv) break;
+        }
+        prevBossRecv = bossRecvFinish;
+        prevPlaneRecv = planeRecvFinish;
+        //Timer::msleep(sleepTime);  // wait
         recv(); // recv the info of round >= i
         GameInfo cntGameInfo = gameInfo;
         vector<NewBullet> validNewBullets;
@@ -86,12 +94,12 @@ void GameServer::shakeHands() {
             recvString(socket, players[clientType].name);
             //cout << "recv " << players[clientType].name.toStdString() << endl;
             if ((CLIENT_TYPE)clientType == BOSS) {
-                bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, &recvBossMsg, this);
+                bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, &recvBossMsg, &bossRecvFinish, this);
                 connect(bossRecvThread, SIGNAL(finished()), bossRecvThread, SLOT(deleteLater()));
                 bossRecvThread->start();
                 sendString(socket, QString("shake hand over"));
             } else {
-                planeRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvMoves, &recvSkills, &recvPlaneMsg, this);
+                planeRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvMoves, &recvSkills, &recvPlaneMsg, &planeRecvFinish, this);
                 connect(planeRecvThread, SIGNAL(finished()), planeRecvThread, SLOT(deleteLater()));
                 planeRecvThread->start();
                 sendString(socket, QString("shake hand over"));
@@ -217,12 +225,13 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
     gameInfo.planeX = planeX;
     gameInfo.planeY = planeY;
 
-    if (cntMoveX == 0 && cntMoveY == 0)
+    if (cntMoveX == 0 && cntMoveY == 0) {
         gameInfo.score ++;
-    if (gameInfo.score > 0 && gameInfo.score % GAIN_SPEEDUP == 0)
-        gameInfo.planeSkillsNum[0] ++;
-    if (gameInfo.score > 0 && gameInfo.score % GAIN_BOMB == 0)
-        gameInfo.planeSkillsNum[1] ++;
+        if (gameInfo.score > 0 && gameInfo.score % GAIN_SPEEDUP == 0)
+            gameInfo.planeSkillsNum[0] ++;
+        if (gameInfo.score > 0 && gameInfo.score % GAIN_BOMB == 0)
+            gameInfo.planeSkillsNum[1] ++;
+    }
 
     // Calculate bullets
     vector<Bullet> bullets;
@@ -277,8 +286,10 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
 void GameServer::genRep(const GameInfo& cntGameInfo, const vector<NewBullet>& validNewBullets) {
     fprintf(repFile, "%d\n", validNewBullets.size());
     fprintf(repFile, "%d %d\n", cntGameInfo.round, cntGameInfo.score);
-    fprintf(repFile, "%s\n", recvBossMsg.toStdString().c_str());
-    fprintf(repFile, "%s\n", recvPlaneMsg.toStdString().c_str());
+    if (recvBossMsg == "") recvBossMsg = "NULL";
+    if (recvPlaneMsg == "") recvPlaneMsg = "NULL";
+    fprintf(repFile, "%s\n", recvBossMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
+    fprintf(repFile, "%s\n", recvPlaneMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
     fprintf(repFile, "%lf %lf %d\n", cntGameInfo.planeX, cntGameInfo.planeY, gameInfo.score - cntGameInfo.score);
     fprintf(repFile, "%d %d\n", cntGameInfo.planeSkillsNum[0], cntGameInfo.planeSkillsNum[1]);
     int useSpeedup = (lastSpeedup == gameInfo.round);

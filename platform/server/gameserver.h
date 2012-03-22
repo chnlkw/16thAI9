@@ -46,6 +46,9 @@ private:
     vector<Skill> recvSkills, skills;
     QString recvBossMsg, recvPlaneMsg;
 
+    volatile int bossRecvFinish, planeRecvFinish;
+    int prevBossRecv, prevPlaneRecv;
+
     ServerReceiverThread *bossRecvThread, *planeRecvThread;
 
 };
