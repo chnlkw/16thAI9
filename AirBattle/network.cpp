@@ -12,16 +12,21 @@ void sendString(QTcpSocket* socket, const QString& v) {
     socket->waitForBytesWritten(-1);
 }
 
-void recvString(QTcpSocket *socket, QString &v) {
+bool recvString(QTcpSocket *socket, QString &v, int mode) {
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_0);
-    while (socket->bytesAvailable() < (int)sizeof(quint32))
-        socket->waitForReadyRead(10);
+    int count = 0;
+    while (socket->bytesAvailable() < (int)sizeof(quint32)) {
+        socket->waitForReadyRead(20);
+        count ++;
+        if (mode == 1 && count == 300) return false;
+    }
     quint32 blockSize;
     in >> blockSize;
     while (socket->bytesAvailable() < blockSize)
-        socket->waitForReadyRead(10);
+        socket->waitForReadyRead(20);
     in >> v;
+    return true;
 }
 
 void sendInt(QTcpSocket *socket, const int &v) {
@@ -33,6 +38,6 @@ void sendInt(QTcpSocket *socket, const int &v) {
 void recvInt(QTcpSocket *socket, int &v) {
     QDataStream in(socket);
     while (socket->bytesAvailable() < (int)sizeof(qint32))
-        socket->waitForReadyRead(10);
+        socket->waitForReadyRead(20);
     in >> v;
 }

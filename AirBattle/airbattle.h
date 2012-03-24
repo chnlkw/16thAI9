@@ -30,6 +30,7 @@ class AirBattle : public QMainWindow
 public:
     explicit AirBattle(QWidget *parent = 0);
     ~AirBattle();
+    void roundTimeOut();
 
 signals:
     void reset();

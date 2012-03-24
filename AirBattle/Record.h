@@ -32,7 +32,7 @@ signals:
     void setPlayerWord(QString);
     void recordOver();
 
-private slots:
+public slots:
     void OnTimer();
     void OnViewFinished();
 

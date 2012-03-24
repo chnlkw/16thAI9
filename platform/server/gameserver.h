@@ -40,6 +40,7 @@ private:
     QTcpSocket* bossSendSocket, *planeSendSocket, *guiSendSocket;
 
     vector<NewBullet> newBullets[3001][5];
+    QString bossMsg, planeMsg;
 
     vector<NewBullet> recvNewBullets;
     vector<Move> recvMoves, moves;
@@ -47,7 +48,6 @@ private:
     QString recvBossMsg, recvPlaneMsg;
 
     volatile int bossRecvFinish, planeRecvFinish;
-    int prevBossRecv, prevPlaneRecv;
 
     ServerReceiverThread *bossRecvThread, *planeRecvThread;
 

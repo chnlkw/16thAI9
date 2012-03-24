@@ -35,7 +35,9 @@ void ServerReceiverThread::run() {
             recvMoves(socket, *moves);
             recvSkills(socket, *skills);
         }
-        (*recvFinish) ++;
+        int round;
+        recvInt(socket, round);
+        *recvFinish = round;
     }
 }
 

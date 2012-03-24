@@ -8,7 +8,6 @@ GameServer::GameServer(int gui, char* repFileName, int totRounds, int sleepTime)
     memset(gameInfo.planeSkillsNum, 0, sizeof(gameInfo.planeSkillsNum));
     cntRecvNewBulletsNum = cntRecvMovesNum = cntRecvSkillsNum = 0;
     bossRecvFinish = planeRecvFinish = 0;
-    prevBossRecv = prevPlaneRecv = 0;
     lastSpeedup = -10000;
     this->gui = gui;
     this->repFileName = repFileName;
@@ -18,15 +17,13 @@ GameServer::GameServer(int gui, char* repFileName, int totRounds, int sleepTime)
 
 void GameServer::run() {
     this->listen(SERVER_ADDR, SERVER_PORT);
-    //cout << "begin shake hands" << endl;
     shakeHands();
-    //cout << "shake hands over" << endl;
 
     gameInfo.gameStatus = BATTLE;
 
     repFile = fopen(repFileName, "w");
-    fprintf(repFile, "%s\n", players[(int)BOSS].name.toStdString().c_str());
-    fprintf(repFile, "%s\n", players[(int)PLANE].name.toStdString().c_str());
+    fprintf(repFile, "%s\n", players[(int)BOSS].name.replace("\r", "_").replace("\n", "_").toStdString().c_str());
+    fprintf(repFile, "%s\n", players[(int)PLANE].name.replace("\r", "_").replace("\n", "_").toStdString().c_str());
     fprintf(repFile, "\n");
 
     fprintf(repFile, "0\n");
@@ -39,15 +36,13 @@ void GameServer::run() {
     fprintf(repFile, "\n");
 
     for (gameInfo.round = 1; gameInfo.round <= totRounds; gameInfo.round ++) {
-        printf("%d %d\n", gameInfo.round, gameInfo.score);
+        //printf("%d %d\n", gameInfo.round, gameInfo.score);
         send(); // send the info of round i
         if (gameInfo.gameStatus != BATTLE) break;
-        for (int i = 0; i < 10; i ++) {
-            Timer::msleep(sleepTime / 10);
-            if (bossRecvFinish > prevBossRecv && planeRecvFinish > prevPlaneRecv) break;
+        for (int i = 0; i < 100; i ++) {
+            Timer::msleep(sleepTime / 100);
+            if (bossRecvFinish == gameInfo.round && planeRecvFinish == gameInfo.round) break;
         }
-        prevBossRecv = bossRecvFinish;
-        prevPlaneRecv = planeRecvFinish;
         //Timer::msleep(sleepTime);  // wait
         recv(); // recv the info of round >= i
         GameInfo cntGameInfo = gameInfo;
@@ -58,7 +53,10 @@ void GameServer::run() {
     }
     if (gameInfo.round == totRounds + 1) send();
 
-    //printf("%d\n", gameInfo.score);
+    vector<NewBullet> validNewBullets;
+    genRep(gameInfo, validNewBullets);
+
+    printf("%d\n", gameInfo.score);
 
     sendString(bossSendSocket, QString("close"));
     sendString(planeSendSocket, QString("close"));
@@ -70,29 +68,19 @@ void GameServer::run() {
 }
 
 void GameServer::shakeHands() {
-    for (int i = 0; i < 4 + gui; i ++) {
-        //cout << i << endl;
-        while (!this->waitForNewConnection(5000)) cout << "waiting connection" << endl;
-        QTcpSocket* socket = this->nextPendingConnection();
-
-        //cout << "new connection: " << socket->socketDescriptor() << endl;
-
+    for (int i = 0; i < 4 + gui;) {
+        waitForNewConnection(100);
+        QTcpSocket* socket = NULL;
+        socket = this->nextPendingConnection();
+        if (socket == NULL) continue;
+        else i ++;
         sendString(socket, QString("accepted"));
-
-        //cout << "send accepted" << endl;
-
         QString sr;
         recvString(socket, sr);
-
-        //cout << "recv " << sr.toStdString() << endl;
-
-        //players[clientType].socketDescriptor = socket->socketDescriptor();
         if (sr == "client sender") {
             int clientType;
             recvInt(socket, clientType);
-            //cout << "recv " << clientType << endl;
             recvString(socket, players[clientType].name);
-            //cout << "recv " << players[clientType].name.toStdString() << endl;
             if ((CLIENT_TYPE)clientType == BOSS) {
                 bossRecvThread = new ServerReceiverThread(socket->socketDescriptor(), &recvNewBullets, &recvBossMsg, &bossRecvFinish, this);
                 connect(bossRecvThread, SIGNAL(finished()), bossRecvThread, SLOT(deleteLater()));
@@ -107,7 +95,6 @@ void GameServer::shakeHands() {
         } else if (sr == "client recver") {
             int clientType;
             recvInt(socket, clientType);
-            //cout << "recv " << clientType << endl;
             if ((CLIENT_TYPE)clientType == BOSS) {
                 bossSendSocket = new QTcpSocket();
                 bossSendSocket->setSocketDescriptor(socket->socketDescriptor());
@@ -146,9 +133,6 @@ void GameServer::judge(const GameInfo& cntGameInfo, const vector<NewBullet>& val
             min = MIN(min, a*t*t + b*t + c);
         if (min <= 0) {
             hit = true;
-//            printf("hit: bullet: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", bullet.x, bullet.y, bullet.vx, bullet.vy);
-//            printf("plane: (%0.2lf, %0.2lf), (%0.2lf, %0.2lf)\n", xp, yp, dx, dy);
-//            system("pause");
             break;
         }
     }
@@ -202,7 +186,7 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
         const Move& move = moves[i];
         if (move.endTime <= gameInfo.round) continue;
         if (move.startTime == gameInfo.round &&
-                SQR(move.vx) + SQR(move.vy) > SQR(PLANE_V) + EPSILON && lastSpeedup + SPEEDUP_TIME <= gameInfo.round)
+                SQR(move.vx) + SQR(move.vy) > SQR(PLANE_V + EPSILON) && lastSpeedup + SPEEDUP_TIME <= gameInfo.round)
             continue;
         validMoves.push_back(move);
         if (move.startTime <= gameInfo.round) {
@@ -286,10 +270,8 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
 void GameServer::genRep(const GameInfo& cntGameInfo, const vector<NewBullet>& validNewBullets) {
     fprintf(repFile, "%d\n", validNewBullets.size());
     fprintf(repFile, "%d %d\n", cntGameInfo.round, cntGameInfo.score);
-    if (recvBossMsg == "") recvBossMsg = "NULL";
-    if (recvPlaneMsg == "") recvPlaneMsg = "NULL";
-    fprintf(repFile, "%s\n", recvBossMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
-    fprintf(repFile, "%s\n", recvPlaneMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
+    fprintf(repFile, "%s\n", bossMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
+    fprintf(repFile, "%s\n", planeMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
     fprintf(repFile, "%lf %lf %d\n", cntGameInfo.planeX, cntGameInfo.planeY, gameInfo.score - cntGameInfo.score);
     fprintf(repFile, "%d %d\n", cntGameInfo.planeSkillsNum[0], cntGameInfo.planeSkillsNum[1]);
     int useSpeedup = (lastSpeedup == gameInfo.round);
@@ -313,6 +295,12 @@ void GameServer::send() {
 }
 
 void GameServer::recv() {
+    // messages
+    if (bossRecvFinish != gameInfo.round) bossMsg = "NULL";
+    else bossMsg = recvBossMsg;
+    if (planeRecvFinish != gameInfo.round) planeMsg = "NULL";
+    else planeMsg = recvPlaneMsg;
+
     // new bullets
     int size = recvNewBullets.size();
     for (int i = cntRecvNewBulletsNum; i < size; i ++)
@@ -323,12 +311,12 @@ void GameServer::recv() {
     // moves
     size = recvMoves.size();
     for (int i = cntRecvMovesNum; i < size; i ++) {
-        //printf("%lf %lf ", recvMoves[i].vx, recvMoves[i].vy);
+        //fprintf(debugFile, "%d %lf %lf\n", recvMoves[i].startTime, recvMoves[i].vx, recvMoves[i].vy);
         if (isValidMove(recvMoves[i])) {
             moves.push_back(recvMoves[i]);
-            //printf("valid\n");
+            //fprintf(debugFile, "valid\n");
         } else {
-            //printf("invalid\n");
+            //fprintf(debugFile, "invalid\n");
         }
     }
     cntRecvMovesNum = size;

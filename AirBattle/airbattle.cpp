@@ -24,6 +24,12 @@ AirBattle::~AirBattle()
     delete ui;
 }
 
+
+void AirBattle::roundTimeOut()
+{
+    record->OnTimer();
+}
+
 void AirBattle::GameInit()
 {
     view = new View(ui->frame);
@@ -340,7 +346,6 @@ void AirBattle::Door_Close_End()
 
         system(plateform.toStdString().c_str());
         system(boss.toStdString().c_str());
-        MyTimer::msleep(1000);
         system(player.toStdString().c_str());
 
         //SButton_Drop();

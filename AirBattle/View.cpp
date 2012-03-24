@@ -16,7 +16,7 @@ void View::GameInit()
 
     // 定义时钟
     timer = new QTimer;
-    timer->setInterval(20);
+    timer->setInterval(1000.0/PER_GUI_FRE);
     timer->start();
     timer->connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
@@ -155,10 +155,18 @@ bool View::check1(){
 
 void View::OnTimer()
 {
-    check1();
+    //check1();
+    // if ((countForTimeOut++*PER_ROUND_FRE)%PER_GUI_FRE==0)
+    //     ui->roundTimeOut();
     // 移动
+    if (Bomb)
+    {
+        for (int i = 3; i < n; i++)
+            if (ElementList[i].tex == 2)
+               ElementList[i--] = ElementList[--n];
+    }
     for (int i = 0; i < n; i++)
-        ElementList[i].go(1.0/50);
+        ElementList[i].go(1.0/PER_GUI_FRE);
 
     // 清除出界元素
     for (int i = 3; i < n; i++)

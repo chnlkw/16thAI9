@@ -2,6 +2,11 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QFile>
+#include <string>
+
+using namespace std;
+
+int SpeedUP, Bomb;
 
 Record::Record(GameCenter *game)
 {
@@ -12,7 +17,7 @@ Record::Record(GameCenter *game)
 void Record::GameInit()
 {
     timer = new QTimer;
-    timer->setInterval(200);
+    timer->setInterval(1000.0/PER_ROUND_FRE);
     connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(gamecenter, SIGNAL(Finished()), this, SLOT(OnViewFinished()));
 }
@@ -54,6 +59,7 @@ void Record::Play_Before()
 
 void Record::Play()
 {
+    SpeedUP=Bomb=0;
     timer->start();
     gamecenter->Continue();
 }
@@ -77,7 +83,7 @@ void Record::OnTimer()
     }
     else
     {
-        gamecenter->ElementMoveTo(1, player_pos, 0.1*2);
+        gamecenter->ElementMoveTo(1, player_pos, 1.0/PER_ROUND_FRE);
     }
     time++;
     if (ip + 4 > lines.size())
@@ -93,7 +99,7 @@ void Record::DealFrame(bool tag)
     QString tmp = lines[ip++];
     int n = tmp.toInt();
 
-    qDebug() << n;
+    //qDebug() << n;
 
     tmp = lines[ip++];
     int r, s;
@@ -112,6 +118,23 @@ void Record::DealFrame(bool tag)
     int flag;
     tmp = lines[ip++];
     sscanf(tmp.toStdString().c_str(), "%f%f%d", &x, &y, &flag);
+    SpeedUP=Bomb=0;
+    if (!tag && ip+3+n < lines.size()) {
+        tmp = lines[ip+2+n];
+        int m = tmp.toInt();
+        if (ip+15+n+m < lines.size()) {
+            tmp = lines[ip+13+n+m];
+            sscanf(tmp.toStdString().c_str(), "%f%f%d", &x, &y, &flag);
+        } else if (ip+6+n < lines.size()) {
+            tmp = lines[ip+6+n];
+            sscanf(tmp.toStdString().c_str(), "%f%f%d", &x, &y, &flag);
+        }
+        if (ip+8+n < lines.size()) {
+            tmp = lines[ip+8+n];
+            sscanf(tmp.toStdString().c_str(), "%d%d", &SpeedUP, &Bomb);
+        }
+    }
+
     player_pos.setX(x);
     player_pos.setY(y);
 
@@ -130,13 +153,13 @@ void Record::DealFrame(bool tag)
         gamecenter->addBullet(QPointF(x, y), QPointF(vx, vy));
     }
 
-    if (!tag && ip+4 < lines.size())
+    /*if (!tag && ip+4 < lines.size())
     {
         tmp = lines[ip+4];
         sscanf(tmp.toStdString().c_str(), "%f%f%d", &x, &y, &flag);
         player_pos.setX(x);
         player_pos.setY(y);
-    }
+    }*/
 }
 
 void Record::Pause()

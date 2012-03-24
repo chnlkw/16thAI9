@@ -4,7 +4,7 @@
 #include <QTcpSocket>
 
 void sendString(QTcpSocket* socket, const QString& v);
-void recvString(QTcpSocket* socket, QString& v);
+bool recvString(QTcpSocket* socket, QString& v, int mode = 0);
 
 void sendInt(QTcpSocket* socket, const int& v);
 void recvInt(QTcpSocket* socket, int& v);

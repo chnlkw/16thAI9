@@ -9,6 +9,9 @@ Server::Server()
 void Server::shakeHands()
 {
     QString s;
+    socket = new QTcpSocket();
+    socket->connectToHost(QHostAddress("127.0.0.1"), 20129);
+    socket->waitForConnected();
     recvString(socket, s);
     sendString(socket, "gui");
     recvString(socket, s);
@@ -17,12 +20,6 @@ void Server::shakeHands()
 void Server::reset()
 {
     qDebug()<<"thread reset: "<<QThread::currentThreadId();
-
-    delete socket;
-
-    socket = new QTcpSocket();
-    socket->connectToHost(QHostAddress("127.0.0.1"), 20129);
-    socket->waitForConnected();
 
     shakeHands();
     int round, score;

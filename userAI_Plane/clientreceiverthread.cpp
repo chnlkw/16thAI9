@@ -26,25 +26,19 @@ void ClientReceiverThread::run() {
         assert(serverStatus == "actions");
         recvGameInfo(recvSocket, *gameInfo);
         *recvOverFlag = true;
-        //printf("recv: %d %u set %d\n", gameInfo->round, gameInfo->bullets.size(), *recvOverFlag);
     }
     recvSocket->disconnectFromHost();
 }
 
 void ClientReceiverThread::shakeHands() {
-    //cout << "thread create" << endl;
     recvSocket = new QTcpSocket();
     recvSocket->connectToHost(serverAddr, serverPort);
-    while (!recvSocket->waitForConnected(1000)) cout << "connect failed" << endl;
-
-    //cout << "thread connect: " << recvSocket->state() << endl;
+    recvSocket->waitForConnected();
     QString s;
     recvString(recvSocket, s);
-    //cout << "thread recv " << s.toStdString() << endl;
     assert(s == "accepted");
     sendString(recvSocket, "client recver");
     sendInt(recvSocket, (int)clientType);
     recvString(recvSocket, s);
-    //cout << "thread recv " << s.toStdString() << endl;
     assert(s == "shake hand over");
 }

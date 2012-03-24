@@ -36,6 +36,7 @@ void GameClient::run() {
         sendString(sendSocket, QString(msg.c_str()));
         sendMoves(sendSocket, moves);
         sendSkills(sendSocket, skills);
+        sendInt(sendSocket, gameInfo.round);
     }
 
     // The last action, send a string 'close'.
@@ -49,23 +50,18 @@ void GameClient::init() {
     aiName = QString(buf.c_str());
 }
 
-void GameClient::shakeHands() {    
+void GameClient::shakeHands() {
+    QString s;
     sendSocket = new QTcpSocket();
     sendSocket->connectToHost(serverAddr, serverPort);
     sendSocket->waitForConnected();
-
-    QString s;
     recvString(sendSocket, s);
-    //cout << "recv " << s.toStdString() << endl;
     assert(s == "accepted");
     sendString(sendSocket, "client sender");
     sendInt(sendSocket, (int)clientType);
     sendString(sendSocket, aiName);
     recvString(sendSocket, s);
-    //cout << "recv " << s.toStdString() << endl;
     assert(s == "shake hand over");
-
-    Timer::msleep(500);
 
     recvThread = new ClientReceiverThread(serverAddr, serverPort, clientType, &recvGameInfo, &recvOverFlag);
     recvThread->start();
