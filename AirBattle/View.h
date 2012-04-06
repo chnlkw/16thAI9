@@ -11,6 +11,7 @@
 #include <QPixmap>
 #include <qgl.h>
 #include <QRgb>
+#include <QKeyEvent>
 
 class View : public QGLWidget
 {
@@ -20,17 +21,23 @@ public:
 
 public:
     Element ElementList[MAX_ELEMENT_NUM];
-    bool check;
+    bool is_Bomb;
     int n;
 
     void Pause();
     void Continue();
 
 signals:
-    void Finished();
+    void call_record();
 
-private:
+public:
     QTimer* timer;
+    int time_int;
+    void speedUp();
+    void speedDown();
+
+    void keyPressEvent(QKeyEvent *e);
+    void Bomb();
 
 private slots:
     void OnTimer();
@@ -47,12 +54,10 @@ protected:
     QPointF ViewToOpenGL(QPointF);
     QPointF SizeToOpenGL(QPointF);
 
-    GLuint texture[10]; // Ã˘Õº
+    GLuint texture[100]; // Ã˘Õº
     int nowtex; // µ±«∞Œ∆¿Ì
     void loadSingleTexture(QString file, GLuint &u, double alpha = 1);
     void loadGLTextures();
-
-    bool check1();
 };
 
 #endif // VIEW_H

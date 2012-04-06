@@ -14,10 +14,4 @@
 #define PI 3.14159265358979323846264338327950288
 #define MAX_ELEMENT_NUM 10000
 
-#define PER_ROUND_FRE 10
-#define PER_GUI_FRE 60
-
-extern int Bomb;
-extern int SpeedUP;
-
 #endif // CONST_H

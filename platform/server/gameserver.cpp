@@ -36,7 +36,7 @@ void GameServer::run() {
     fprintf(repFile, "\n");
 
     for (gameInfo.round = 1; gameInfo.round <= totRounds; gameInfo.round ++) {
-        printf("%d %d\n", gameInfo.round, gameInfo.score);
+        //printf("%d %d\n", gameInfo.round, gameInfo.score);
         send(); // send the info of round i
         if (gameInfo.gameStatus != BATTLE) break;
         for (int i = 0; i < 100; i ++) {
@@ -56,7 +56,7 @@ void GameServer::run() {
     vector<NewBullet> validNewBullets;
     genRep(gameInfo, validNewBullets);
 
-    //printf("%d\n", gameInfo.score);
+    printf("%d\n", gameInfo.score);
 
     sendString(bossSendSocket, QString("close"));
     sendString(planeSendSocket, QString("close"));
@@ -302,6 +302,8 @@ void GameServer::recv() {
     else planeMsg = recvPlaneMsg;
     if (bossMsg == "") bossMsg = "NULL";
     if (planeMsg == "") planeMsg = "NULL";
+    bossMsg.truncate(100);
+    planeMsg.truncate(100);
 
     // new bullets
     int size = recvNewBullets.size();

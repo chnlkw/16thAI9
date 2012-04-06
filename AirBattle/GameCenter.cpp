@@ -13,7 +13,6 @@ GameCenter::GameCenter(View *view)
 void GameCenter::GameInit()
 {
     view->setGeometry(31, 25, width, height);
-    connect(view, SIGNAL(Finished()), this, SLOT(RecvFinished()));
 
     clear();
 }
@@ -77,6 +76,12 @@ void GameCenter::init(QPointF player_pos, QPointF boss_pos)
     Element &boss = view->ElementList[view->n++];
     boss.SetInit(boss_pos, QPointF(BOSS_WIDTH, BOSS_HEIGTH));
     boss.SetTex(1);
+
+    // 3£º´óÕÐ
+    Element &big = view->ElementList[view->n++];
+    big.SetInit(QPointF(300, 1025), QPointF(1500, 20));
+    for (int i = 0; i < 6; i++) big.pushTex(i + 10);
+    big.startTex();
 }
 
 void GameCenter::ElementMoveTo(int i, QPointF pos, float time)
@@ -91,17 +96,19 @@ void GameCenter::Pause()
 
 void GameCenter::Continue()
 {
+    view->time_int = 20;
     view->Continue();
+    view->is_Bomb = false;
 }
 
 void GameCenter::Record_Over()
 {
-    view->check = true;
     view->Pause();
-    //emit Finished();
 }
 
-void GameCenter::RecvFinished()
+void GameCenter::Bomb()
 {
-    emit Finished();
+    view->is_Bomb = true;
+    view->ElementList[3].pos = QPointF(300, 1030);
+    ElementMoveTo(3, QPointF(300, -30), 1.5);
 }

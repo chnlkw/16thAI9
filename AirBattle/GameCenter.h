@@ -9,12 +9,6 @@ class GameCenter : public QObject
 public:
     GameCenter(View *view);
 
-signals:
-    void Finished();
-
-private slots:
-    void RecvFinished();
-
 private:
     void GameInit();
 
@@ -39,6 +33,8 @@ public:
     void Pause();
     void Continue();
     void Record_Over();
+
+    void Bomb();
 };
 
 #endif // GAMECENTER_H

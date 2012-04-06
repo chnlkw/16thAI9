@@ -10,6 +10,7 @@
 #include <QPropertyAnimation>
 #include <QThread>
 #include "server.h"
+#include <QKeyEvent>
 
 namespace Ui {
     class AirBattle;
@@ -31,6 +32,8 @@ public:
     explicit AirBattle(QWidget *parent = 0);
     ~AirBattle();
     void roundTimeOut();
+
+    void keyPressEvent(QKeyEvent *e);
 
 signals:
     void reset();

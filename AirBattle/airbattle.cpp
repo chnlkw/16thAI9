@@ -37,6 +37,8 @@ void AirBattle::GameInit()
     record = new Record(gamecenter);
     filecenter = new FileCenter;
     this->setGeometry(100, 50, 768, 576);
+    connect(view, SIGNAL(call_record()), record, SLOT(ViewTimer()));
+    setFocusPolicy(Qt::StrongFocus);
 
     // 创建线程
     QThread * thread = new QThread(this);
@@ -358,6 +360,14 @@ void AirBattle::Door_Close_End()
         Door_Open();
         return;
     }
+
+    if (state == -1)
+    {
+        swaptoframe2();
+        Door_Open();
+        on_AI_clicked();
+        return;
+    }
 }
 
 void AirBattle::SButton_Drop(int Delay)
@@ -400,8 +410,6 @@ void AirBattle::on_viewstart_clicked()
 
     if (state == 5)
     {
-        record->Pause();
-        ui->viewstart->setText(tr("Resume"));
         state = 7;
         return;
     }
@@ -417,8 +425,6 @@ void AirBattle::on_viewstart_clicked()
 
     if (state == 7)
     {
-        record->Continue();
-        ui->viewstart->setText(tr("Pause"));
         state = 5;
         return;
     }
@@ -438,7 +444,6 @@ void AirBattle::on_viewback_clicked()
 {
     if (state == 5)
     {
-        record->Pause();
     }
 
     Door_Close();
@@ -487,7 +492,6 @@ void AirBattle::on_SButton_clicked()
     SButton->setEndValue(QRect(325,751,100,100));
     SButton->setEasingCurve(curve);
     SButton->start();
-    connect(SButton, SIGNAL(finished()), this, SLOT(on_SButton_Removed()));
 }
 
 void AirBattle::on_SButton_Removed()
@@ -500,4 +504,29 @@ void AirBattle::on_SButton_Removed()
 
     swaptoframe();
     Door_Open();
+}
+
+void AirBattle::keyPressEvent(QKeyEvent *e)
+{
+    switch(e->key())
+    {
+    case Qt::Key_Up:
+        view->speedUp();
+        break;
+
+    case Qt::Key_Down:
+        view->speedDown();
+        break;
+    case Qt::Key_Escape:
+        view->timer->stop();
+        state = -1;
+        Door_Close();
+        break;
+    case Qt::Key_Space:
+        if (view->timer->isActive())
+            view->timer->stop();
+        else
+            view->timer->start();
+    }
+    qDebug() << e->key();
 }

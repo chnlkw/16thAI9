@@ -11,12 +11,12 @@ View::View(QWidget *parent)
 void View::GameInit()
 {
     nowtex = -1;
-    check = false;
     n = 0;
 
     // 定义时钟
     timer = new QTimer;
-    timer->setInterval(1000.0/PER_GUI_FRE);
+    time_int = 20;
+    timer->setInterval(time_int);
     timer->start();
     timer->connect(timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
@@ -62,6 +62,14 @@ void View::loadGLTextures()
     loadSingleTexture("res/player.png", texture[3]);
     loadSingleTexture("res/frame.png", texture[4]);
     loadSingleTexture("res/plane_bullet.png", texture[5]);
+
+    // 大招贴图
+    loadSingleTexture("res/line0.png", texture[10]);
+    loadSingleTexture("res/line1.png", texture[11]);
+    loadSingleTexture("res/line2.png", texture[12]);
+    loadSingleTexture("res/line3.png", texture[13]);
+    loadSingleTexture("res/line4.png", texture[14]);
+    loadSingleTexture("res/line5.png", texture[15]);
 }
 
 void View::initializeGL()
@@ -146,40 +154,34 @@ void View::paintGL()
         DrawElement(&ElementList[i]);
 }
 
-bool View::check1(){
-    qDebug() << "-------------------------------------------------------";
-    for (int i = 0; i < n; i++)
-        qDebug() << "(" << ElementList[i].v.x() << "," << ElementList[i].v.y() << ")";
-    return false;
-}
-
 void View::OnTimer()
 {
-    //check1();
-    // if ((countForTimeOut++*PER_ROUND_FRE)%PER_GUI_FRE==0)
-    //     ui->roundTimeOut();
-    // 移动
-    if (Bomb)
+    if (is_Bomb)
     {
-        for (int i = 3; i < n; i++)
+        // 移动ElementList[4]
+        ElementList[3].go(1.0/50.0);
+
+        // 清除销毁子弹
+        for (int i = 4; i < n; i++)
             if (ElementList[i].tex == 2)
-               ElementList[i--] = ElementList[--n];
+                if (ElementList[i].pos.y()+20 >= ElementList[3].pos.y())
+                    ElementList[i--] = ElementList[--n];
+
+        // 判断是否结束大招
+        if (ElementList[3].pos.y() <= -25) is_Bomb = false;
+        update();
+        return;
     }
+    // 移动
     for (int i = 0; i < n; i++)
-        ElementList[i].go(1.0/PER_GUI_FRE);
+        ElementList[i].go(1.0/50.0);
 
     // 清除出界元素
-    for (int i = 3; i < n; i++)
+    for (int i = 4; i < n; i++)
         if (!ElementList[i].visual())
             ElementList[i--] = ElementList[--n];
     update();
-
-    if (check && n == 3)
-    {
-        Pause();
-        check = false;
-        emit Finished();
-    }
+    emit call_record();
 }
 
 QPointF View::ViewToOpenGL(QPointF tmp)
@@ -199,11 +201,49 @@ QPointF View::SizeToOpenGL(QPointF tmp)
 void View::Pause()
 {
     timer->stop();
-    check = false;
-    emit Finished();
 }
 
 void View::Continue()
 {
     timer->start();
+}
+
+void View::speedUp()
+{
+    if (time_int > 1)
+    {
+        time_int /=2;
+        timer->setInterval(time_int);
+        timer->stop();
+        timer->start();
+    }
+}
+
+void View::speedDown()
+{
+    if (time_int < 10000)
+    {
+        time_int *= 2;
+        timer->setInterval(time_int);
+    }
+}
+
+void View::keyPressEvent(QKeyEvent *e)
+{
+    switch(e->key())
+    {
+    case Qt::Key_Up:
+        speedUp();
+        break;
+
+    case Qt::Key_Down:
+        speedDown();
+        break;
+    }
+    qDebug() << e->key();
+}
+
+void View::Bomb()
+{
+
 }

@@ -16,6 +16,7 @@ Element::Element()
 {
     speed = false;
     tex = 0;
+    gif = false;
 }
 
 void Element::SetInit(QPointF p, QPointF s, float a)
@@ -41,6 +42,12 @@ float length(QPointF a)
 
 void Element::go(float delta)
 {
+    if (gif)
+    {
+        tex = TEX[gif_count];
+        gif_count = (gif_count + 1) % TEX.size();
+    }
+
     if (!speed) return;
 
     if (moveto == 0)
@@ -110,4 +117,27 @@ bool Element::visual()
 void Element::SetTex(int u)
 {
     tex = u;
+}
+
+void Element::clearTex()
+{
+    TEX.clear();
+}
+
+void Element::pushTex(int x)
+{
+    TEX.push_back(x);
+}
+
+void Element::startTex()
+{
+    gif = true;
+    gif_count = 0;
+}
+
+void Element::stopTex(int x)
+{
+    tex = x;
+    gif = false;
+    gif_count = 0;
 }

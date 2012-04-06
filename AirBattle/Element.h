@@ -4,6 +4,7 @@
 #include <const.h>
 #include <qmath.h>
 #include <QPointF>
+#include <QVector>
 
 class Element
 {
@@ -23,6 +24,17 @@ public:
 
 
     int tex; // 贴图
+
+    // 动画框架
+    QVector<int> TEX;
+    int gif_count;
+    bool gif;
+
+    // 接口函数
+    void clearTex();
+    void pushTex(int);
+    void startTex();
+    void stopTex(int);
 
     Element();
 

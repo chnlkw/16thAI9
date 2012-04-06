@@ -20,9 +20,6 @@ public:
     void Play_Before();
     void Play();
 
-    void Pause();
-    void Continue();
-
     QString boss, player;
 
 signals:
@@ -34,16 +31,21 @@ signals:
 
 public slots:
     void OnTimer();
+    void ViewTimer();
     void OnViewFinished();
 
 private:
     QStringList lines;
-    QTimer *timer;
     int ip; // 指向当前待读行
     int time; // 第几回合
     bool pause;
+    bool timer_state;
+    int timer_count;
+    int SpeedUP, Bomb;
 
     void DealFrame(bool tag = false);
+    void timer_start();
+    void timer_stop();
 
     QPointF player_pos, boss_pos;
 };
