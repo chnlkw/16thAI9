@@ -1,6 +1,6 @@
 #include "gameserver.h"
 
-GameServer::GameServer(int gui, char* repFileName, int totRounds, int sleepTime) {
+GameServer::GameServer(int gui, int web, char* repFileName, int totRounds, int sleepTime) {
     gameInfo.gameStatus = INIT;
     gameInfo.score = 0;
     gameInfo.planeX = PLANE_INIT_X;
@@ -10,6 +10,7 @@ GameServer::GameServer(int gui, char* repFileName, int totRounds, int sleepTime)
     bossRecvFinish = planeRecvFinish = 0;
     lastSpeedup = -10000;
     this->gui = gui;
+    this->web = web;
     this->repFileName = repFileName;
     this->totRounds = totRounds;
     this->sleepTime = sleepTime;
@@ -36,14 +37,13 @@ void GameServer::run() {
     fprintf(repFile, "\n");
 
     for (gameInfo.round = 1; gameInfo.round <= totRounds; gameInfo.round ++) {
-        //printf("%d %d\n", gameInfo.round, gameInfo.score);
+        if (!web) printf("%d %d\n", gameInfo.round, gameInfo.score);
         send(); // send the info of round i
         if (gameInfo.gameStatus != BATTLE) break;
         for (int i = 0; i < 100; i ++) {
             Timer::msleep(sleepTime / 100);
             if (bossRecvFinish == gameInfo.round && planeRecvFinish == gameInfo.round) break;
         }
-        //Timer::msleep(sleepTime);  // wait
         recv(); // recv the info of round >= i
         GameInfo cntGameInfo = gameInfo;
         vector<NewBullet> validNewBullets;
@@ -56,7 +56,7 @@ void GameServer::run() {
     vector<NewBullet> validNewBullets;
     genRep(gameInfo, validNewBullets);
 
-    printf("%d\n", gameInfo.score);
+    if (web) printf("%d\n", gameInfo.score);
 
     sendString(bossSendSocket, QString("close"));
     sendString(planeSendSocket, QString("close"));
@@ -302,8 +302,8 @@ void GameServer::recv() {
     else planeMsg = recvPlaneMsg;
     if (bossMsg == "") bossMsg = "NULL";
     if (planeMsg == "") planeMsg = "NULL";
-    bossMsg.truncate(100);
-    planeMsg.truncate(100);
+    if (web) bossMsg.truncate(100);
+    if (web) planeMsg.truncate(100);
 
     // new bullets
     int size = recvNewBullets.size();
@@ -315,13 +315,8 @@ void GameServer::recv() {
     // moves
     size = recvMoves.size();
     for (int i = cntRecvMovesNum; i < size; i ++) {
-        //fprintf(debugFile, "%d %lf %lf\n", recvMoves[i].startTime, recvMoves[i].vx, recvMoves[i].vy);
-        if (isValidMove(recvMoves[i])) {
+        if (isValidMove(recvMoves[i]))
             moves.push_back(recvMoves[i]);
-            //fprintf(debugFile, "valid\n");
-        } else {
-            //fprintf(debugFile, "invalid\n");
-        }
     }
     cntRecvMovesNum = size;
 
@@ -341,10 +336,8 @@ int GameServer::getBulletType(double vx, double vy) {
     return -1;
 }
 
-
 bool GameServer::isValidNewBullet(const NewBullet &bullet) {
     if (bullet.initTime < gameInfo.round || bullet.initTime > totRounds) return false;
-    //if (bullet.vy > 0) return false;
     if (getBulletType(bullet.vx, bullet.vy) == -1) return false;
     return true;
 }

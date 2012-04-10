@@ -17,6 +17,7 @@ AirBattle::AirBattle(QWidget *parent) :
     QTextCodec::setCodecForTr(QTextCodec::codecForName(TextCodec));
 
     GameInit();
+    setFixedSize(768, 576);
 }
 
 AirBattle::~AirBattle()
@@ -344,7 +345,7 @@ void AirBattle::Door_Close_End()
     {
         QString boss      = "start bin/userAI_Boss.exe bin/aiBoss.dll";
         QString player    = "start bin/userAI_Plane.exe bin/aiPlane.dll";
-        QString plateform = "start bin/platform.exe 1 replay.txt 3000 100";
+        QString plateform = "start bin/platform.exe 1 0 replay.txt 3000 100";
 
         system(plateform.toStdString().c_str());
         system(boss.toStdString().c_str());
@@ -510,11 +511,11 @@ void AirBattle::keyPressEvent(QKeyEvent *e)
 {
     switch(e->key())
     {
-    case Qt::Key_Up:
+    case Qt::Key_Plus:
+    case Qt::Key_Equal:
         view->speedUp();
         break;
-
-    case Qt::Key_Down:
+    case Qt::Key_Minus:
         view->speedDown();
         break;
     case Qt::Key_Escape:

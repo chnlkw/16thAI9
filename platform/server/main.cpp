@@ -1,11 +1,14 @@
 #include "gameserver.h"
 
 int main(int argc, char* argv[]) {
-    if (argc != 5) {
-        printf("Usage: platform.exe gui replay rounds time\n");
+    if (argc != 6) {
+        printf("Usage: platform.exe gui webkernel replay rounds time\n");
         printf("Gui:\n");
-        printf("  0         No gui\n");
-        printf("  1         Has gui\n");
+        printf("  0         no gui\n");
+        printf("  1         has gui\n");
+        printf("Webkernel:\n");
+        printf("  0         not web kernel version\n");
+        printf("  1         web kernel version\n");
         printf("Replay:\n");
         printf("  fileName  write replay to fileName\n");
         printf("Rounds:\n");
@@ -14,10 +17,11 @@ int main(int argc, char* argv[]) {
         printf("  time      set the time interval of every two rounds, counts in milliseconds\n");
     } else {
         int gui = atoi(argv[1]);
-        char* replay = argv[2];
-        int rounds = atoi(argv[3]);
-        int time = atoi(argv[4]);
-        GameServer gameServer(gui, replay, rounds, time);
+        int web = atoi(argv[2]);
+        char* replay = argv[3];
+        int rounds = atoi(argv[4]);
+        int time = atoi(argv[5]);
+        GameServer gameServer(gui, web, replay, rounds, time);
         gameServer.run();
     }
     return 0;
