@@ -214,8 +214,7 @@ void sendGameInfo(QTcpSocket *socket, const GameInfo &gameInfo) {
     out << gameInfo.round;
     out << gameInfo.score;
     out << (int)gameInfo.gameStatus;
-    out << gameInfo.planeSkillsNum[0];
-    out << gameInfo.planeSkillsNum[1];
+    out << gameInfo.planeSkillsNum;
     out << gameInfo.planeX;
     out << gameInfo.planeY;
     out << (quint32)gameInfo.bullets.size();
@@ -252,8 +251,7 @@ void recvGameInfo(QTcpSocket *socket, GameInfo &gameInfo) {
     int gameStatus;
     in >> gameStatus;
     gameInfo.gameStatus = (GAME_STATUS)gameStatus;
-    in >> gameInfo.planeSkillsNum[0];
-    in >> gameInfo.planeSkillsNum[1];
+    in >> gameInfo.planeSkillsNum;
     in >> gameInfo.planeX;
     in >> gameInfo.planeY;
     quint32 size;

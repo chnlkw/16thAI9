@@ -35,7 +35,7 @@ struct Player {
 struct GameInfo {
     int round, score;
     GAME_STATUS gameStatus;
-    int planeSkillsNum[2];
+    int planeSkillsNum;
     double planeX, planeY;
     vector<Bullet> bullets;
 };

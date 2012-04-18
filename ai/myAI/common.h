@@ -49,8 +49,8 @@ struct GameInfo {
     int round, score;
     // 当前游戏状态
     GAME_STATUS gameStatus;
-    // 飞机当前可用的技能点数
-    int planeSkillsNum[2];
+    // 飞机当前的技能点数
+    int planeSkillsNum;
     // 飞机当前的坐标
     double planeX, planeY;
     // 当前的子弹信息

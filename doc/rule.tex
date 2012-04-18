@@ -10,7 +10,7 @@
 
 % Chinese support
 \setCJKmainfont[BoldFont={Adobe Heiti Std}, ItalicFont={Adobe Kaiti Std}]{Adobe Song Std}
-\setCJKsansfont{WenQuanYi Zen Hei}
+%\setCJKsansfont{WenQuanYi Zen Hei}
 \setCJKmonofont{Adobe Fangsong Std}
 \punctstyle{quanjiao}
 
@@ -56,7 +56,7 @@
 \subsection{Boss的机制}
 Boss是固定与屏幕上方的一个战舰，可以从一个固定点发射匀速飞行的圆形子弹。
 
-一共有5种不同类型的子弹，它们的速度、半径以及受到的限制各不相同。对某类子弹的限制体现为，在任意时刻，屏幕上该类子弹的数目不能超过一个给定的值。
+一共有5种不同类型的子弹，它们的速度、半径以及受到的限制各不相同。对某类子弹的限制体现为，在任意时刻，屏幕上该类子弹的数目不能超过一个给定的值，\textbf{并且，每回合发射该类子弹不超过max(0.4 * 剩余可发子弹数, 6)个}。
 
 玩家需要根据游戏局面信息，控制Boss发射新子弹，指定其速度和发射时间。
 
@@ -65,14 +65,14 @@ Plane是一个可以在屏幕上移动的小飞机，它在静止时会默认向
 
 Plane的移动速度有一个上限，在正常状况下不能超过该上限。
 
+\textbf{Plane每存活100回合，会获得一个技能点}。
+
 Plane具有两个特殊的技能：
 \begin{enumerate}[(a)]
 \item 加速\\
-Plane每击中Boss 50下，会获得一个``加速''技能。\\
-使用该技能会让Plane的速度上限变为原来的2倍，持续3秒钟。
+使用该技能会让Plane的速度上限变为原来的2倍，持续3秒钟。\textbf{损失2个技能点}。
 \item 清屏\\
-Plane每击中Boss 100下，会再额外获得一个``清屏''技能。\\
-使用该技能会瞬间清楚屏幕上的所有子弹。
+使用该技能会瞬间清楚屏幕上的所有子弹。\textbf{损失5个技能点}。
 \end{enumerate}
 
 \subsection{胜负判定}
@@ -101,7 +101,7 @@ Plane每击中Boss 100下，会再额外获得一个``清屏''技能。\\
 \hline
 子弹类型&1&2&3&4&5\\
 \hline
-子弹速度（每0.1s移动的距离）&32&36&40&44&48\\
+子弹速度（每0.1s移动的距离）&\textbf{34}&\textbf{38}&\textbf{42}&\textbf{46}&\textbf{50}\\
 \hline
 子弹半径&15&15&15&15&15\\
 \hline

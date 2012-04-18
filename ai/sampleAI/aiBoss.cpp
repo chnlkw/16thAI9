@@ -22,7 +22,7 @@ int getBulletType(double vx, double vy) {
 void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets, string& msg)
 {
 	// 计算当前已发子弹数目，以及限制子弹的数目。
-	int cntBulletsNum[5], limitBulletsNum[5];
+	int cntBulletsNum[5], limitBulletsNum[5], maxNewBulletsNum[5];
     memset(cntBulletsNum, 0, sizeof(cntBulletsNum));
     for (int i = 0; i < 5; i ++)
         limitBulletsNum[i] = (int)(BULLET_INIT_LIMIT[i] * BULLET_INCREASE(gameInfo.round));
@@ -30,6 +30,11 @@ void getAction(const GameInfo& gameInfo, vector<NewBullet>& newBullets, string& 
     for (int i = 0; i < gameInfo.bullets.size(); i ++) {
     	int type = getBulletType(gameInfo.bullets[i].vx, gameInfo.bullets[i].vy);
     	cntBulletsNum[type] ++;	
+    }
+    
+    for (int i = 0; i < 5; i ++) {
+        maxNewBulletsNum[i] = MAX(MIN_BULLETS, (int)(OUTPUT_FACTOR * (limitBulletsNum[i] - cntBulletsNum[i])));
+        limitBulletsNum[i] = MIN(limitBulletsNum[i], cntBulletsNum[i] + maxNewBulletsNum[i]);
     }
     
     // 每个子弹都发满。

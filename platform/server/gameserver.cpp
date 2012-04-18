@@ -5,7 +5,7 @@ GameServer::GameServer(int gui, int web, char* repFileName, int totRounds, int s
     gameInfo.score = 0;
     gameInfo.planeX = PLANE_INIT_X;
     gameInfo.planeY = PLANE_INIT_Y;
-    memset(gameInfo.planeSkillsNum, 0, sizeof(gameInfo.planeSkillsNum));
+    gameInfo.planeSkillsNum = 0;
     cntRecvNewBulletsNum = cntRecvMovesNum = cntRecvSkillsNum = 0;
     bossRecvFinish = planeRecvFinish = 0;
     lastSpeedup = -10000;
@@ -167,16 +167,18 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
     for (int i = 0; i < skills.size(); i ++) {
         const Skill& skill = skills[i];
         if (skill.startTime != gameInfo.round) continue;
-        if (gameInfo.planeSkillsNum[(int)skill.type] == 0) continue;
         switch (skill.type) {
         case SPEEDUP:
+            if (gameInfo.planeSkillsNum < SPEEDUP_COST) break;
             lastSpeedup = gameInfo.round;
+            gameInfo.planeSkillsNum -= SPEEDUP_COST;
             break;
         case BOMB:
+            if (gameInfo.planeSkillsNum < BOMB_COST) break;
             useBomb = true;
+            gameInfo.planeSkillsNum -= BOMB_COST;
             break;
         }
-        gameInfo.planeSkillsNum[(int)skill.type] --;
     }
 
     // Calculate planeX, planeY
@@ -209,18 +211,15 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
     gameInfo.planeX = planeX;
     gameInfo.planeY = planeY;
 
-    if (cntMoveX == 0 && cntMoveY == 0) {
+    if (cntMoveX == 0 && cntMoveY == 0)
         gameInfo.score ++;
-        if (gameInfo.score > 0 && gameInfo.score % GAIN_SPEEDUP == 0)
-            gameInfo.planeSkillsNum[0] ++;
-        if (gameInfo.score > 0 && gameInfo.score % GAIN_BOMB == 0)
-            gameInfo.planeSkillsNum[1] ++;
-    }
+    if (gameInfo.round > 0 && gameInfo.round % GAIN_SKILLPOINT == 0)
+        gameInfo.planeSkillsNum ++;
 
     // Calculate bullets
     vector<Bullet> bullets;
     if (!useBomb) {
-        int cntBulletsNum[5], limitBulletsNum[5];
+        int cntBulletsNum[5], limitBulletsNum[5], maxNewBulletsNum[5];
         memset(cntBulletsNum, 0, sizeof(cntBulletsNum));
         for (int i = 0; i < 5; i ++)
             limitBulletsNum[i] = (int)(BULLET_INIT_LIMIT[i] * BULLET_INCREASE(gameInfo.round));
@@ -240,6 +239,11 @@ void GameServer::updateGameInfo(vector<NewBullet>& validNewBullets) {
                 bullet.vy = gameInfo.bullets[i].vy;
                 bullets.push_back(bullet);
             }
+        }
+
+        for (int i = 0; i < 5; i ++) {
+            maxNewBulletsNum[i] = MAX(MIN_BULLETS, (int)(OUTPUT_FACTOR * (limitBulletsNum[i] - cntBulletsNum[i])));
+            limitBulletsNum[i] = MIN(limitBulletsNum[i], cntBulletsNum[i] + maxNewBulletsNum[i]);
         }
 
         for (int j = 0; j < 5; j ++) {
@@ -273,7 +277,7 @@ void GameServer::genRep(const GameInfo& cntGameInfo, const vector<NewBullet>& va
     fprintf(repFile, "%s\n", bossMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
     fprintf(repFile, "%s\n", planeMsg.replace("\r", " ").replace("\n", " ").toStdString().c_str());
     fprintf(repFile, "%lf %lf %d\n", cntGameInfo.planeX, cntGameInfo.planeY, gameInfo.score - cntGameInfo.score);
-    fprintf(repFile, "%d %d\n", cntGameInfo.planeSkillsNum[0], cntGameInfo.planeSkillsNum[1]);
+    fprintf(repFile, "%d %d\n", cntGameInfo.planeSkillsNum, cntGameInfo.planeSkillsNum);
     int useSpeedup = (lastSpeedup == gameInfo.round);
     fprintf(repFile, "%d %d\n", useSpeedup, useBomb);
     for (int i = 0; i < validNewBullets.size(); i ++)

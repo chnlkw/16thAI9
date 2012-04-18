@@ -64,11 +64,12 @@ void getAction(const GameInfo& gameInfo, vector<Move>& moves, vector<Skill>& ski
 		// 随机一个速度大小。
 		int v = rand() % ((int)(PLANE_V)) + 1;
 		
-		// 如果有“加速”可用，那么就用。
-		if (gameInfo.planeSkillsNum[0] > 0) v = (int)(PLANE_V * 2);
+		// 如果有“加速”可用，那么有1%的概率用。
+        int t = rand() % 100;
+		if (gameInfo.planeSkillsNum > SPEEDUP_COST && t == 0) v = (int)(PLANE_V * 2);
 			
 		// 随机一个移动的方向。
-		int t = rand() % 2;
+		t = rand() % 2;
 		int p = (t == 1 ? 1 : -1);
 		double vx = p * (rand() % 100);
 		t = rand() % 2;
@@ -108,7 +109,7 @@ void getAction(const GameInfo& gameInfo, vector<Move>& moves, vector<Skill>& ski
 	}
 	
 	// 如果都躲不过去，那么看看有没有“清屏”大招可用。
-	if (gameInfo.planeSkillsNum[1] > 0) {
+	if (gameInfo.planeSkillsNum >= BOMB_COST) {
 		Skill skill;
 		skill.startTime = gameInfo.round;
 		skill.type = BOMB;
