@@ -2,6 +2,9 @@
 #define GAMECENTER_H
 
 #include <View.h>
+#include <vector>
+
+using namespace std;
 
 class GameCenter : public QObject
 {
@@ -35,6 +38,8 @@ public:
     void Record_Over();
 
     void Bomb();
+
+    void getBulletsPos(vector<QPointF>& pos);
 };
 
 #endif // GAMECENTER_H

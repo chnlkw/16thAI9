@@ -112,3 +112,9 @@ void GameCenter::Bomb()
     view->ElementList[3].pos = QPointF(300, 1030);
     ElementMoveTo(3, QPointF(300, -30), 1.5);
 }
+
+void GameCenter::getBulletsPos(vector<QPointF> &pos) {
+    for (int i = 4; i < view->n; i ++) {
+        pos.push_back(view->getElementPos(i));
+    }
+}

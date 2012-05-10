@@ -2,15 +2,16 @@
 #define AIRBATTLE_H
 
 #include <QMainWindow>
-#include <GameCenter.h>
-#include "filecenter.h"
 #include <QModelIndex>
-#include <Record.h>
 #include <QTextCodec>
 #include <QPropertyAnimation>
 #include <QThread>
-#include "server.h"
 #include <QKeyEvent>
+
+#include "filecenter.h"
+#include "server.h"
+#include "Record.h"
+#include "humanconsole.h"
 
 namespace Ui {
     class AirBattle;
@@ -34,6 +35,7 @@ public:
     void roundTimeOut();
 
     void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
 
 signals:
     void reset();
@@ -75,6 +77,7 @@ private:
     View *view;
     GameCenter *gamecenter;
     Record *record;
+    HumanConsole* humanConsole;
     FileCenter *filecenter;
     Server *server;
 
@@ -89,6 +92,8 @@ private:
     // 5: 正在播放录像
     // 6: 录像播放完毕
     // 7: 暂停播放录像
+    // 8: 尚未开始人机对战
+
 
 private:
     void GameInit();

@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     Record.cpp \
     filecenter.cpp \
     server.cpp \
-    network.cpp
+    network.cpp \
+    humanconsole.cpp \
+    aiBoss.cpp
 
 HEADERS  += airbattle.h \
     View.h \
@@ -29,6 +31,30 @@ HEADERS  += airbattle.h \
     Record.h \
     filecenter.h \
     server.h \
-    network.h
+    network.h \
+    humanconsole.h \
+    common.h \
+    aiBoss.h
 
 FORMS    += airbattle.ui
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

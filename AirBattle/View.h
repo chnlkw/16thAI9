@@ -36,8 +36,9 @@ public:
     void speedUp();
     void speedDown();
 
-    void keyPressEvent(QKeyEvent *e);
+    //void keyPressEvent(QKeyEvent *e);
     void Bomb();
+    QPointF getElementPos(int i);
 
 private slots:
     void OnTimer();

@@ -15,6 +15,7 @@ ClientReceiverThread::ClientReceiverThread(QHostAddress serverAddr, quint16 serv
 
 void ClientReceiverThread::run() {
     shakeHands();
+
     while (true) {
         QString serverStatus;
         recvString(recvSocket, serverStatus);

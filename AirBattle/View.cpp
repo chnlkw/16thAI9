@@ -228,22 +228,26 @@ void View::speedDown()
     }
 }
 
-void View::keyPressEvent(QKeyEvent *e)
-{
-    switch(e->key())
-    {
-    case Qt::Key_Up:
-        speedUp();
-        break;
+//void View::keyPressEvent(QKeyEvent *e)
+//{
+//    switch(e->key())
+//    {
+//    case Qt::Key_Up:
+//        speedUp();
+//        break;
 
-    case Qt::Key_Down:
-        speedDown();
-        break;
-    }
-    qDebug() << e->key();
-}
+//    case Qt::Key_Down:
+//        speedDown();
+//        break;
+//    }
+//    qDebug() << e->key();
+//}
 
 void View::Bomb()
 {
 
+}
+
+QPointF View::getElementPos(int i) {
+    return ElementList[i].pos;
 }

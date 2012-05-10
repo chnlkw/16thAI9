@@ -33,12 +33,15 @@ void AirBattle::roundTimeOut()
 
 void AirBattle::GameInit()
 {
+    humanConsole = NULL;
     view = new View(ui->frame);
     gamecenter = new GameCenter(view);
     record = new Record(gamecenter);
     filecenter = new FileCenter;
+    humanConsole = new HumanConsole(gamecenter);
     this->setGeometry(100, 50, 768, 576);
     connect(view, SIGNAL(call_record()), record, SLOT(ViewTimer()));
+    connect(view, SIGNAL(call_record()), humanConsole, SLOT(onTimer()));
     setFocusPolicy(Qt::StrongFocus);
 
     // 创建线程
@@ -161,6 +164,8 @@ void AirBattle::on_record_clicked()
     p1 = p2 = "";
     ui->start->setText(tr("Replay!"));
 
+    humanConsole->active = false;
+
     QStringList ans = filecenter->Record_List();
     ui->list->clear();
     ui->list->addItems(ans);
@@ -178,6 +183,8 @@ void AirBattle::on_AI_clicked()
     rec = "";
     ui->start->setText(tr("Fight!"));
 
+    humanConsole->active = false;
+
     QStringList ans = filecenter->AI_List();
     ui->list->clear();
     ui->list->addItems(ans);
@@ -187,6 +194,7 @@ void AirBattle::on_AI_clicked()
         ui->list->setCurrentRow(0);
     }
     setVS(p1, p2);
+    ui->list->addItem(tr("HumanConsole"));
 }
 
 void AirBattle::on_start_clicked()
@@ -194,6 +202,21 @@ void AirBattle::on_start_clicked()
     if (state == 0)
     {
         if (p1 == "" || p2 == "") return;
+
+        // Human console
+        if (p2 == "HumanConsole") {
+            QString Boss = "ai/" + p1 + "/aiBoss.dll";
+            QString gb = "bin/aiBoss.dll";
+            if (QFile::exists(gb)) QFile::remove(gb);
+            QFile::copy(Boss, gb);
+
+            state = 3;
+            humanConsole->active = true;
+            Door_Close();
+            return;
+        }
+        // End Human console
+
         QString Boss = "ai/" + p1 + "/aiBoss.dll";
         QString Player = "ai/" + p2 + "/aiPlane.dll";
         QString gb = "bin/aiBoss.dll";
@@ -328,6 +351,8 @@ void AirBattle::Door_Open_End()
     {
         playrecord(rec);
         record->Play();
+    } else if (state == 8) {
+        humanConsole->run();
     }
 }
 
@@ -343,11 +368,21 @@ void AirBattle::Door_Close_End()
 
     if (state == 3)
     {
+        if (humanConsole->active) {
+            humanConsole->init();
+//            QString boss = "start bin/userAI_Boss.exe bin/aiBoss.dll";
+//            system(boss.toStdString().c_str());
+            state = 8;
+            swaptoframe();
+            Door_Open();
+            return;
+        }
+
         QString boss      = "start bin/userAI_Boss.exe bin/aiBoss.dll";
         QString player    = "start bin/userAI_Plane.exe bin/aiPlane.dll";
-        QString plateform = "start bin/platform.exe 1 0 replay.txt 3000 100";
+        QString platform = "start bin/platform.exe 1 0 replay.txt 3000 100";
 
-        system(plateform.toStdString().c_str());
+        system(platform.toStdString().c_str());
         system(boss.toStdString().c_str());
         system(player.toStdString().c_str());
 
@@ -528,6 +563,41 @@ void AirBattle::keyPressEvent(QKeyEvent *e)
             view->timer->stop();
         else
             view->timer->start();
+        break;
+    case Qt::Key_Up:
+        humanConsole->keyUp = true;
+        break;
+    case Qt::Key_Down:
+        humanConsole->keyDown = true;
+        break;
+    case Qt::Key_Left:
+        humanConsole->keyLeft = true;
+        break;
+    case Qt::Key_Right:
+        humanConsole->keyRight = true;
+        break;
+    case Qt::Key_Shift:
+        humanConsole->keyShift = true;
+        break;
     }
-    qDebug() << e->key();
+}
+
+void AirBattle::keyReleaseEvent(QKeyEvent *e) {
+    switch(e->key()) {
+    case Qt::Key_Up:
+        humanConsole->keyUp = false;
+        break;
+    case Qt::Key_Down:
+        humanConsole->keyDown = false;
+        break;
+    case Qt::Key_Left:
+        humanConsole->keyLeft = false;
+        break;
+    case Qt::Key_Right:
+        humanConsole->keyRight = false;
+        break;
+    case Qt::Key_Shift:
+        humanConsole->keyShift = false;
+        break;
+    }
 }
